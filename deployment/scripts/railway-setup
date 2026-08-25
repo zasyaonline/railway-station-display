@@ -140,6 +140,11 @@ install_files() {
   chmod -R u=rwX,g=rX,o=rX "$ROOT"
   chown -R zasya-display:zasya "$ROOT/data" "$ROOT/coach-position/data" "$DATA/platform" "$DATA/coach"
   chmod -R ug+rwX "$ROOT/data" "$ROOT/coach-position/data" "$DATA/platform" "$DATA/coach"
+  if [[ ! -f "$ROOT/data/sessions.json" ]]; then
+    printf '%s\n' '{"sessions":{}}' > "$ROOT/data/sessions.json"
+  fi
+  chown zasya-display:zasya "$ROOT/data/sessions.json"
+  chmod 0660 "$ROOT/data/sessions.json"
   install -m 0755 "$SOURCE/deployment/kiosk/chromium-kiosk.sh" /usr/local/sbin/chromium-kiosk
   install -m 0755 "$SOURCE/deployment/kiosk/zasya-railway-display.sh" /usr/local/sbin/zasya-railway-display
   install -m 0755 "$SOURCE/deployment/scripts/railway-setup" /usr/local/sbin/railway-setup

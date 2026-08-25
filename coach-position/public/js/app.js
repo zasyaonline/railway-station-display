@@ -22,6 +22,18 @@ function $(id) { return document.getElementById(id); }
 function qs(name) {
   return new URLSearchParams(location.search).get(name);
 }
+function publicBase() {
+  const configured = CONFIG.PUBLIC_BASE;
+  if (configured != null && String(configured).length) {
+    return String(configured).replace(/\/$/, '');
+  }
+  if (location.pathname.startsWith('/coach')) return '/coach';
+  return '';
+}
+function assetUrl(p) {
+  const path = p.startsWith('/') ? p : `/${p}`;
+  return `${publicBase()}${path}`;
+}
 const DEFAULT_STATION = 'BG';
 const DEFAULT_DISPLAY = 'entrance-main';
 function isLocalHost() {
@@ -368,10 +380,10 @@ function updateClock() {
 
 function coachAsset(typeId) {
   const id = typeId || 'unknown';
-  if (THEME === 'chart') return `/img/chart/${id}.svg`;
+  if (THEME === 'chart') return assetUrl(`/img/chart/${id}.svg`);
   const types = (typesDoc && typesDoc.types) || {};
   const asset = (types[id] && types[id].asset) || `${id}.png`;
-  return `/img/coaches/${asset}`;
+  return assetUrl(`/img/coaches/${asset}`);
 }
 
 function normStation(s) {
@@ -589,9 +601,9 @@ function amenityLabel(amenity) {
 
 function amenityIconSrc(amenity) {
   const building = AMENITY_BUILDING_IMG[amenity.id];
-  if (building) return `/img/amenities/${building}`;
+  if (building) return assetUrl(`/img/amenities/${building}`);
   const file = AMENITY_ICON[amenity.category] || 'facility.svg';
-  return `/img/amenities/${file}`;
+  return assetUrl(`/img/amenities/${file}`);
 }
 
 function amenitiesForPlatform(layout, platformId) {
@@ -742,7 +754,7 @@ function fobBridgeOverlayHtml(
 
   return `
     <div class="fob-bridge-overlay" style="--fob-anchor:${anchor.toFixed(2)}%" role="img" aria-label="${esc(label)}">
-      <img class="fob-bridge-art" src="/img/amenities/fob-transparent.png" alt="" draggable="false">
+      <img class="fob-bridge-art" src="${assetUrl('/img/amenities/fob-transparent.png')}" alt="" draggable="false">
     </div>`;
 }
 
@@ -837,7 +849,7 @@ function platformHtml(youAreHere, coaches, engineOnRight, platformId, layout, wa
     const pct = ((pinDisplayIndex + 0.5) / count) * 100;
     pin = `
       <div class="you-pin" style="left:${pct}%">
-        <img class="traveler" src="/img/you-are-here.png" alt="" draggable="false">
+        <img class="traveler" src="${assetUrl('/img/you-are-here.png')}" alt="" draggable="false">
         <div class="pin-cluster">
           <span class="label">${t('youAreHere')}</span>
         </div>

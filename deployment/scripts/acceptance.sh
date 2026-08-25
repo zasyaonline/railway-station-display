@@ -54,13 +54,22 @@ cmd_urls() {
   check_http http://127.0.0.1/coach/ "coach"
   check_http http://127.0.0.1/admin/ "admin"
   check_http http://127.0.0.1/health "health"
+  check_http http://127.0.0.1/api/trains "platform-trains"
+  check_http http://127.0.0.1/coach/img/coaches/general.png "coach-art"
+  check_http http://127.0.0.1/coach/img/you-are-here.png "coach-you-are-here"
+  check_http http://127.0.0.1/img/coaches/general.png "coach-img-root"
 }
 
 cmd_services() {
-  for s in zasya-railway-ntes zasya-railway-platform zasya-railway-coach zasya-railway-admin nginx zasya-railway-display zasya-railway-kiosk; do
+  for s in zasya-railway-ntes zasya-railway-platform zasya-railway-coach zasya-railway-admin nginx zasya-railway-display; do
     systemctl is-active --quiet "$s.service" 2>/dev/null || systemctl is-active --quiet "$s" || fail "$s not active"
     pass "$s"
   done
+  if systemctl is-active --quiet zasya-railway-kiosk.service 2>/dev/null; then
+    pass "zasya-railway-kiosk"
+  else
+    printf 'WARN %s\n' "zasya-railway-kiosk not active (snap Chromium); passenger URLs on :80 are still valid"
+  fi
 }
 
 cmd_isolation() {

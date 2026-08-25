@@ -46,8 +46,12 @@ npm test
 
 ADMIN_PW_FILE="$(mktemp /tmp/zasya-admin-XXXXXX)"
 chmod 600 "$ADMIN_PW_FILE"
-openssl rand -hex 12 > "$ADMIN_PW_FILE"
-install -m 0600 "$ADMIN_PW_FILE" /root/zasya-admin-password
+if [[ -s /root/zasya-admin-password ]]; then
+  tr -d '\r\n' < /root/zasya-admin-password > "$ADMIN_PW_FILE"
+else
+  openssl rand -hex 12 > "$ADMIN_PW_FILE"
+  install -m 0600 "$ADMIN_PW_FILE" /root/zasya-admin-password
+fi
 
 echo "==> railway-setup (BG / Bhongir, sample licence)"
 bash "${SOURCE}/deployment/scripts/railway-setup" \

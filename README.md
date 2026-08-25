@@ -70,6 +70,8 @@ curl -fsS http://127.0.0.1/health
 sudo journalctl -u zasya-railway-platform -u zasya-railway-coach -u zasya-railway-admin -u zasya-railway-ntes -n 80
 ```
 
+Coach sprites load from `/coach/img/...` (nginx prefix). A fresh clone includes that mapping plus `/img/` → coach as a fallback.
+
 If Chromium is missing on this Ubuntu/arch, kiosk/display units may fail while Platform/Coach/Admin on `:80` still work.
 
 After a reboot, systemd target `zasya-railway.target` starts the four processes and nginx again.
