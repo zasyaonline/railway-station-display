@@ -198,7 +198,7 @@ write_config() {
     --kiosk "$kiosk"
   chmod 0640 "$ETC/config.json" "$ETC/ntes.json"
   chown root:zasya "$ETC/config.json"
-  chown root:zasya-ntes "$ETC/ntes.json"
+  chown root:zasya "$ETC/ntes.json"
 
   if [[ -n "$licence_src" && -f "$licence_src" ]]; then
     cp "$licence_src" "$ETC/licence.json"
@@ -228,7 +228,7 @@ write_config() {
   ZASYA_RAILWAY_ETC="$ETC" ZASYA_RAILWAY_ROOT="$DATA" \
     node -e "require(process.argv[1]).saveAdminSecret(process.argv[2])" "$ROOT/edge/admin/auth.js" "$admin_pass"
   chmod 0640 "$ETC/admin.json"
-  chown root:zasya-admin "$ETC/admin.json"
+  chown root:zasya "$ETC/admin.json"
 
   printf '%s\n' "$kiosk" > "$ETC/kiosk-url"
   chmod 0644 "$ETC/kiosk-url"
