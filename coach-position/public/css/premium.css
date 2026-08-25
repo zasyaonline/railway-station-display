@@ -116,6 +116,19 @@ body.theme-premium .focus-id span {
   font-weight: 600;
 }
 
+body.theme-premium .focus-when {
+  color: #f8fafc;
+}
+
+body.theme-premium .focus-when small {
+  color: #7dd3fc;
+}
+
+body.theme-premium .focus-delay {
+  background: #fb7185;
+  color: #1a0a0c;
+}
+
 body.theme-premium .focus-meta .pill {
   background: var(--p-highlight);
   color: #081b33;

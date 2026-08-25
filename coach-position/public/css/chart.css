@@ -76,6 +76,12 @@ body.theme-chart .rake-stage {
 body.theme-chart .focus-kicker { color: #1d4ed8; }
 body.theme-chart .focus-id { color: #111827; }
 body.theme-chart .focus-id strong { color: #1d4ed8; }
+body.theme-chart .focus-when { color: #111827; }
+body.theme-chart .focus-when small { color: #1d4ed8; }
+body.theme-chart .focus-delay {
+  background: #fecaca;
+  color: #991b1b;
+}
 body.theme-chart .focus-meta .pill {
   background: #1d4ed8;
   color: #fff;

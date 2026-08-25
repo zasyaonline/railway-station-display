@@ -387,8 +387,8 @@ function assembleFocus(payload, pick) {
       platform: String(t.platform),
       from: t.from || rake.from,
       to: t.to || rake.to,
-      expectedArrival: t.expectedArrival || rake.expectedArrival,
-      expectedDeparture: t.expectedDeparture || rake.expectedDeparture,
+      expectedArrival: t.expectedArrival || rake.expectedArrival || t.scheduledArrival || rake.scheduledArrival,
+      expectedDeparture: t.expectedDeparture || rake.expectedDeparture || t.scheduledDeparture || rake.scheduledDeparture,
       minutesUntil: pick.minutesUntil,
       status: t.status || rake.status,
       delay: t.delay ?? rake.delay ?? 0
@@ -989,6 +989,37 @@ function renderStationBoard(rows, focusTrainNo) {
     </section>`;
 }
 
+function prettyClock(timeStr) {
+  if (!timeStr || timeStr === '--') return '';
+  return String(timeStr).trim();
+}
+
+function trainDelayMinutes(train) {
+  const n = Number(train?.delay);
+  if (Number.isFinite(n) && n > 0) return n;
+  const status = String(train?.status || '');
+  const m = status.match(/(\d+)/);
+  if (m && /late|delay|विलंब|आलस्य|ఆలస్య/i.test(status)) return Number(m[1]);
+  return 0;
+}
+
+function focusScheduleHtml(train) {
+  const arr = prettyClock(eventTime(train, 'arr'));
+  const dep = prettyClock(eventTime(train, 'dep'));
+  const bits = [];
+  if (arr) {
+    bits.push(`<span class="focus-when"><small>${esc(t('arr'))}</small>${esc(arr)}</span>`);
+  }
+  if (dep && dep !== arr) {
+    bits.push(`<span class="focus-when"><small>${esc(t('dep'))}</small>${esc(dep)}</span>`);
+  }
+  const delayMins = trainDelayMinutes(train);
+  if (delayMins > 0) {
+    bits.push(`<span class="focus-delay">${esc(t('lateBy').replace('{n}', String(delayMins)))}</span>`);
+  }
+  return bits.join('');
+}
+
 function renderFocus(p, bogie, shouldArrive) {
   if (!p) {
     return `<section class="focus-panel"><div class="unavailable">${t('idle')}</div></section>`;
@@ -1006,6 +1037,7 @@ function renderFocus(p, bogie, shouldArrive) {
         ? t('now')
         : `${mins} ${t('min')}`;
   const kicker = p.inWindow ? t('nextArrival') : t('next');
+  const schedule = focusScheduleHtml(train);
 
   const header = `
     <div class="focus-header">
@@ -1014,6 +1046,7 @@ function renderFocus(p, bogie, shouldArrive) {
         <div class="focus-id">
           <strong>${esc(train.trainNo)}</strong>
           <span>${esc(locTrain(train.trainName || ''))}</span>
+          ${schedule}
         </div>
         <div class="focus-meta">
           <span class="pill">${t('platform')} ${esc(p.platform)}</span>
