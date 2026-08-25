@@ -225,7 +225,7 @@ function renderPlatforms(data) {
   const tbody = $('platformBody');
   const trains = data.trains || [];
   if (!trains.length) {
-    tbody.innerHTML = `<tr class="no-trains"><td colspan="5">No trains on the current board</td></tr>`;
+    tbody.innerHTML = `<tr class="no-trains"><td colspan="4">No trains on the current board</td></tr>`;
     return;
   }
 
@@ -245,20 +245,20 @@ function renderPlatforms(data) {
         <td class="train-no">${t.trainNo}</td>
         <td>${t.trainName || '—'}</td>
         <td>${t.ntesPlatform || '—'}${mark}</td>
-        <td>
-          <input
-            class="pf-input"
-            data-train="${t.trainNo}"
-            type="text"
-            maxlength="4"
-            placeholder="PF"
-            value="${String(value).replace(/"/g, '&quot;')}"
-            autocomplete="off"
-          >
-        </td>
-        <td class="pf-actions">
-          <button type="button" class="btn-refresh btn-start btn-pf-save" data-train="${t.trainNo}">Save</button>
-          <button type="button" class="btn-refresh btn-stop btn-pf-clear" data-train="${t.trainNo}">Clear</button>
+        <td class="override-cell">
+          <div class="pf-edit">
+            <input
+              class="pf-input"
+              data-train="${t.trainNo}"
+              type="text"
+              maxlength="4"
+              placeholder="PF"
+              value="${String(value).replace(/"/g, '&quot;')}"
+              autocomplete="off"
+            >
+            <button type="button" class="btn-refresh btn-start btn-pf-save" data-train="${t.trainNo}">OK</button>
+            <button type="button" class="btn-refresh btn-stop btn-pf-clear" data-train="${t.trainNo}">Clear</button>
+          </div>
         </td>
       </tr>`;
   }).join('');
@@ -266,6 +266,12 @@ function renderPlatforms(data) {
   tbody.querySelectorAll('.pf-input').forEach((input) => {
     input.addEventListener('input', () => {
       platformDirty[input.dataset.train] = input.value;
+    });
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter') return;
+      ev.preventDefault();
+      const save = tbody.querySelector(`.btn-pf-save[data-train="${input.dataset.train}"]`);
+      save?.click();
     });
     if (focusedTrain && input.dataset.train === focusedTrain) {
       input.focus();
@@ -280,7 +286,7 @@ function renderPlatforms(data) {
       const input = tbody.querySelector(`.pf-input[data-train="${trainNo}"]`);
       const platform = (input?.value || '').trim();
       if (!platform) {
-        setPlatformStatus('Enter a platform number before Save', true);
+        setPlatformStatus('Enter a platform number before OK', true);
         return;
       }
       btn.disabled = true;

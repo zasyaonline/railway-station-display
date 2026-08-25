@@ -195,6 +195,46 @@
   margin-bottom: 0.75rem;
 }
 
+.admin-table.train-table {
+  height: auto;
+  table-layout: auto;
+}
+
+.admin-table.train-table tbody tr {
+  height: auto;
+}
+
+.admin-table.train-table td {
+  font-size: 0.95rem;
+  overflow: visible;
+  white-space: normal;
+}
+
+.platform-table.train-table th:nth-child(1),
+.platform-table.train-table td:nth-child(1) { width: 12%; }
+.platform-table.train-table th:nth-child(2),
+.platform-table.train-table td:nth-child(2) { width: 38%; }
+.platform-table.train-table th:nth-child(3),
+.platform-table.train-table td:nth-child(3) { width: 14%; }
+.platform-table.train-table th:nth-child(4),
+.platform-table.train-table td:nth-child(4) { width: 36%; }
+
+.pf-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.btn-pf-save,
+.btn-pf-clear {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  min-width: 3.75rem;
+  white-space: nowrap;
+}
+
 .platform-table .pf-input {
   width: 4rem;
   background: #0a1628;
