@@ -221,14 +221,18 @@ body.theme-premium .coach-art {
 }
 
 body.theme-premium .coach .code {
-  background: rgba(8, 16, 32, 0.92);
-  border-radius: 4px;
+  color: #1a1305;
+  background: #fde047;
+  border-radius: 5px;
   font-weight: 800;
+  font-size: clamp(0.78rem, calc(96vw / var(--coach-count) / 4.4), 1.45rem);
+  box-shadow: 0 0 0 1.5px #facc15, 0 1px 5px rgba(0, 0, 0, 0.45);
 }
 
 body.theme-premium .coach .kind {
-  color: var(--p-muted);
-  font-size: clamp(0.38rem, calc(var(--tile-fs) * 0.7), 0.7rem);
+  color: #1f2937;
+  background: #fef08a;
+  font-size: clamp(0.58rem, calc(var(--tile-fs) * 0.95), 0.95rem);
 }
 
 body.theme-premium .coach.pin-aligned {

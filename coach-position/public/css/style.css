@@ -431,30 +431,35 @@ body {
 }
 
 .coach .code {
-  font-size: var(--tile-fs);
-  line-height: 1.1;
+  font-size: clamp(0.78rem, calc(96vw / var(--coach-count) / 4.4), 1.45rem);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background: rgba(8, 16, 32, 0.88);
-  padding: 0.05rem 0.25rem;
-  border-radius: 3px;
+  color: #1a1305;
+  background: #fde047;
+  padding: 0.12rem 0.34rem;
+  border-radius: 5px;
+  box-shadow: 0 0 0 1.5px #facc15, 0 1px 5px rgba(0, 0, 0, 0.4);
   z-index: 6;
 }
 .coach .kind {
-  font-size: clamp(0.4rem, calc(var(--tile-fs) * 0.62), 0.65rem);
-  opacity: 0.85;
+  font-size: clamp(0.58rem, calc(var(--tile-fs) * 0.95), 0.95rem);
+  opacity: 1;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #94a3b8;
+  color: #1f2937;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background: rgba(8, 16, 32, 0.88);
-  padding: 0.02rem 0.2rem;
-  border-radius: 3px;
+  background: #fef08a;
+  padding: 0.06rem 0.28rem;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #facc15;
   z-index: 6;
 }
 

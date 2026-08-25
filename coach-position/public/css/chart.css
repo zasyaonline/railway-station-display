@@ -141,11 +141,13 @@ body.theme-chart .coach-art {
 }
 
 body.theme-chart .coach .code {
-  background: none;
-  color: #111827;
-  font-size: clamp(0.62rem, calc(88vw / var(--coach-count) / 7.2), 1.05rem);
+  color: #1a1305;
+  background: #fde047;
+  font-size: clamp(0.8rem, calc(88vw / var(--coach-count) / 4.2), 1.4rem);
   font-weight: 800;
-  padding: 0;
+  padding: 0.1rem 0.28rem;
+  border-radius: 5px;
+  box-shadow: 0 0 0 1.5px #facc15, 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
 body.theme-chart .coach .kind { display: none; }
