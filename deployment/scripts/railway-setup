@@ -259,15 +259,22 @@ enable_services() {
     zasya-railway-display.service zasya-railway-kiosk.service
   systemctl restart nginx
   systemctl start zasya-railway.target || fail "failed to start zasya-railway.target"
-  systemctl start zasya-railway-display.service || fail "display service not started"
+  systemctl start zasya-railway-display.service || true
   systemctl start zasya-railway-kiosk.service || true
   sleep 2
   systemctl is-active zasya-railway-ntes.service >/dev/null || fail "ntes service not active"
   systemctl is-active zasya-railway-platform.service >/dev/null || fail "platform service not active"
   systemctl is-active zasya-railway-coach.service >/dev/null || fail "coach service not active"
   systemctl is-active zasya-railway-admin.service >/dev/null || fail "admin service not active"
-  systemctl is-active zasya-railway-display.service >/dev/null || fail "display service not active"
-  local kiosk_ok=0 i
+  local i
+  for i in $(seq 1 12); do
+    systemctl is-active zasya-railway-display.service >/dev/null && break
+    sleep 1
+  done
+  if ! systemctl is-active zasya-railway-display.service >/dev/null; then
+    note "WARN: display service not active (no usable HDMI/VT; Xvfb fallback failed). Platform/Coach/Admin on :80 are still the install proof."
+  fi
+  local kiosk_ok=0
   for i in $(seq 1 12); do
     if systemctl is-active zasya-railway-kiosk.service >/dev/null; then
       kiosk_ok=1

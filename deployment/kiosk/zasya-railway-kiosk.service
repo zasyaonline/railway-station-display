@@ -11,8 +11,9 @@ Group=zasya
 Delegate=yes
 Environment=DISPLAY=:0
 Environment=HOME=/home/zasya-kiosk
+EnvironmentFile=-/etc/zasya/railway/display.env
 WorkingDirectory=/home/zasya-kiosk
-ExecStartPre=/bin/bash -c 'for i in $(seq 1 30); do [ -e /tmp/.X11-unix/X0 ] && exit 0; sleep 1; done; exit 1'
+ExecStartPre=/bin/bash -c 'n=${DISPLAY#:}; n=${n:-0}; for i in $(seq 1 30); do [ -S /tmp/.X11-unix/X$n ] && exit 0; sleep 1; done; exit 1'
 ExecStart=/bin/bash -c '/usr/local/sbin/chromium-kiosk "$(cat /etc/zasya/railway/kiosk-url 2>/dev/null || echo http://127.0.0.1/platform/)"'
 Restart=on-failure
 RestartSec=5

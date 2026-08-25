@@ -7,8 +7,9 @@ After=network-online.target
 Type=simple
 User=root
 ExecStart=/usr/local/sbin/zasya-railway-display
-Restart=on-failure
-RestartSec=5
+Restart=always
+RestartSec=3
+TimeoutStartSec=20
 
 [Install]
 WantedBy=zasya-railway.target

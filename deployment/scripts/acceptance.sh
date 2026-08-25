@@ -61,15 +61,17 @@ cmd_urls() {
 }
 
 cmd_services() {
-  for s in zasya-railway-ntes zasya-railway-platform zasya-railway-coach zasya-railway-admin nginx zasya-railway-display; do
+  for s in zasya-railway-ntes zasya-railway-platform zasya-railway-coach zasya-railway-admin nginx; do
     systemctl is-active --quiet "$s.service" 2>/dev/null || systemctl is-active --quiet "$s" || fail "$s not active"
     pass "$s"
   done
-  if systemctl is-active --quiet zasya-railway-kiosk.service 2>/dev/null; then
-    pass "zasya-railway-kiosk"
-  else
-    printf 'WARN %s\n' "zasya-railway-kiosk not active (snap Chromium); passenger URLs on :80 are still valid"
-  fi
+  for s in zasya-railway-display zasya-railway-kiosk; do
+    if systemctl is-active --quiet "$s.service" 2>/dev/null || systemctl is-active --quiet "$s"; then
+      pass "$s"
+    else
+      printf 'WARN %s\n' "$s not active (local X/kiosk); passenger URLs on :80 are still valid"
+    fi
+  done
 }
 
 cmd_isolation() {

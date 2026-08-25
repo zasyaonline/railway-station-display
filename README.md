@@ -6,11 +6,19 @@ This repository is the station PC software only. It does not include AWS, Lambda
 
 Default station in the sample licence: **BG / Bhongir**. Sample licence is valid **2026-08-25 to 2027-08-25** for platform and coach. The signing **private key is not in this repo** and must never be copied onto the appliance.
 
-## Install on Ubuntu Server 24.04
+## Zero-touch install (Ubuntu 24.04)
 
-Proof of success is **nginx on port 80**. Do not use `npm start` as the production path.
+On the station PC or VM, as a user with sudo (git is installed for you):
 
-SSH into the Ubuntu machine (UTM VM or physical PC), then:
+```bash
+curl -fsSL https://raw.githubusercontent.com/zasyaonline/railway-station-display/main/deployment/ubuntu/bootstrap.sh | sudo bash
+```
+
+That command installs **git**, clones this repo, installs Node.js 22 / nginx / Chromium, runs tests, applies the sample licence, and starts systemd + nginx on **port 80**.
+
+Proof of success is **nginx on port 80**. Do not use `npm start` as the production path. Local X/kiosk (HDMI Chromium) is best-effort; Platform, Coach, and Admin on `:80` are the install gate.
+
+### Already cloned
 
 ```bash
 sudo apt-get update && sudo apt-get install -y git
@@ -18,8 +26,6 @@ git clone https://github.com/zasyaonline/railway-station-display.git
 cd railway-station-display
 sudo bash deployment/ubuntu/install.sh
 ```
-
-The installer installs Node.js 22, nginx, Chromium (for kiosk), runs tests, applies the sample licence, starts systemd services, and prints LAN URLs.
 
 ### Zip instead of git clone
 
@@ -67,11 +73,12 @@ sudo railway-acceptance urls
 sudo railway-acceptance services
 sudo systemctl status zasya-railway.target
 curl -fsS http://127.0.0.1/health
+sudo journalctl -u zasya-railway-display -u zasya-railway-kiosk -n 80
 sudo journalctl -u zasya-railway-platform -u zasya-railway-coach -u zasya-railway-admin -u zasya-railway-ntes -n 80
 ```
 
 Coach sprites load from `/coach/img/...` (nginx prefix). A fresh clone includes that mapping plus `/img/` → coach as a fallback.
 
-If Chromium is missing on this Ubuntu/arch, kiosk/display units may fail while Platform/Coach/Admin on `:80` still work.
+Display/kiosk units use a real X console when HDMI is connected, otherwise **Xvfb**. If Chromium snap cannot start under systemd, kiosk may warn while Platform/Coach/Admin on `:80` still work.
 
 After a reboot, systemd target `zasya-railway.target` starts the four processes and nginx again.

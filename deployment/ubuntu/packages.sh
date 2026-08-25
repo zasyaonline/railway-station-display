@@ -2,6 +2,7 @@
 # Install appliance OS packages on Ubuntu Server. Safe to rerun.
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=l
 
 apt-get update
 apt-get install -y --no-install-recommends \
