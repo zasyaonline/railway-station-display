@@ -71,7 +71,7 @@ async function api(path, options = {}) {
   const res = await fetch(url, Object.assign({}, options, { headers }));
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.error || `HTTP ${res.status}`);
+    const err = new Error(data.message || data.error || `HTTP ${res.status}`);
     err.status = res.status;
     throw err;
   }
@@ -170,6 +170,14 @@ function renderSessions(data) {
   $('activeCount').textContent = String(data.activeCount ?? 0);
   $('refreshState').textContent = data.refreshEnabled ? 'LIVE' : 'PAUSED';
   $('refreshState').className = `stat-value ${data.refreshEnabled ? 'live' : 'paused'}`;
+
+  if (data.stationPinned) {
+    $('btnApplyStation').disabled = true;
+    $('stationPreset').disabled = true;
+    $('stationCodeInput').readOnly = true;
+    const pinHelp = $('stationPinnedHelp');
+    if (pinHelp) pinHelp.hidden = false;
+  }
 
   if (Array.isArray(data.stationPresets) && data.stationPresets.length) {
     fillStationPresets(data.stationPresets);
@@ -327,6 +335,27 @@ async function loadPlatforms() {
   }
 }
 
+async function loadApplianceStatus() {
+  const licenceEl = $('licenceChip');
+  if (!licenceEl) return;
+  try {
+    const status = await api('/api/admin/status');
+    licenceEl.textContent = status.licenceState || status.licence || '—';
+    licenceEl.className = `stat-value ${(status.licenceState || status.licence) === 'VALID' ? 'live' : 'paused'}`;
+    if ($('ntesChip')) {
+      const ntes = status.ntes || '—';
+      $('ntesChip').textContent = String(ntes).toUpperCase();
+      $('ntesChip').className = `stat-value ${ntes === 'connected' ? 'live' : 'paused'}`;
+    }
+    if (status.ntes === 'connected' && $('refreshState')) {
+      $('refreshState').textContent = 'LIVE';
+      $('refreshState').className = 'stat-value live';
+    }
+  } catch {
+    /* cloud PDS has no /api/admin/status */
+  }
+}
+
 async function applyStation() {
   const stationCode = $('stationCodeInput').value.trim();
   const btn = $('btnApplyStation');
@@ -343,9 +372,11 @@ async function applyStation() {
     syncStationForm(result.stationCode, result.stationName, true, result.stationNames);
     await loadPlatforms();
   } catch (err) {
-    setStationStatus(err.message, true);
+    setStationStatus(err.status === 403
+      ? (err.message || 'Station is locked to this installation licence')
+      : err.message, true);
   } finally {
-    btn.disabled = false;
+    if (!$('stationCodeInput').readOnly) btn.disabled = false;
   }
 }
 
@@ -362,9 +393,11 @@ async function unlock() {
     }
     $('gate').hidden = true;
     $('panel').hidden = false;
+    await loadApplianceStatus();
     if (pollTimer) clearInterval(pollTimer);
     pollTimer = setInterval(() => {
       loadSessions().catch(() => {});
+      loadApplianceStatus().catch(() => {});
       const active = document.activeElement;
       const editingPf = active && active.classList && active.classList.contains('pf-input');
       if (!editingPf) {

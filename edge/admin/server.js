@@ -94,6 +94,26 @@ function createAdminApp() {
     res.json({ events: readAuditTail(100) });
   });
 
+  async function proxyPlatform(req, res, reqPath) {
+    if (!requireAdmin(req, res, log)) return;
+    const loaded = loadConfig();
+    try {
+      const result = await proxyTo(platformPort(loaded.config), reqPath, {
+        method: req.method,
+        body: req.method === 'GET' || req.method === 'HEAD' ? undefined : req.body,
+        adminKey: providedKey(req)
+      });
+      res.status(result.status).json(result.data);
+    } catch (err) {
+      res.status(502).json({ error: err.message });
+    }
+  }
+
+  app.get('/api/admin/sessions', (req, res) => proxyPlatform(req, res, '/api/admin/sessions'));
+  app.post('/api/admin/sessions/stop', (req, res) => proxyPlatform(req, res, '/api/admin/sessions/stop'));
+  app.post('/api/admin/sessions/stop-all', (req, res) => proxyPlatform(req, res, '/api/admin/sessions/stop-all'));
+  app.post('/api/admin/station', (req, res) => proxyPlatform(req, res, '/api/admin/station'));
+
   app.get('/api/admin/platforms', async (req, res) => {
     if (!requireAdmin(req, res, log)) return;
     const loaded = loadConfig();

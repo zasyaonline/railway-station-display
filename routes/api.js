@@ -232,7 +232,8 @@ function createApiRouter(deps) {
       stationCode: cache.config.stationCode || 'CHZ',
       stationName: cache.config.stationName || 'Charlapalli',
       stationPresets: presetsFromMaster(stations),
-      stationNames: stationLocales(cache.config.stationCode, cache.config.stationName)
+      stationNames: stationLocales(cache.config.stationCode, cache.config.stationName),
+      stationPinned: Boolean(deps.pinnedStation && deps.pinnedStation())
     });
   });
 

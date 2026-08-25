@@ -3,51 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zasya Railway Admin</title>
-  <link rel="stylesheet" href="admin.css">
+  <title>PDS Admin — Sessions</title>
+  <link rel="icon" href="/platform/img/favicon.png" type="image/png" sizes="64x64">
+  <link rel="icon" href="/platform/img/ir-logo.png" type="image/png">
+  <link rel="stylesheet" href="/platform/css/style.css?v=20260825b">
+  <link rel="stylesheet" href="/platform/css/admin.css?v=20260825b">
 </head>
-<body>
-  <header>
-    <h1>Zasya Railway Admin</h1>
-    <p id="stationLine">Station —</p>
+<body class="admin-body">
+  <header class="header admin-header">
+    <div class="header-left">
+      <img src="/platform/img/ir-logo.png" alt="Indian Railways" class="logo">
+      <h1>PDS Admin</h1>
+    </div>
+    <div class="header-right">
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
   </header>
-  <main>
-    <section id="gate">
-      <label for="adminKey">Administrator password</label>
-      <div class="row">
-        <input id="adminKey" type="password" autocomplete="current-password">
-        <button type="button" id="btnUnlock">Open</button>
+
+  <main class="admin-main">
+    <section class="admin-gate" id="gate">
+      <label for="adminKey">Admin key</label>
+      <div class="gate-row">
+        <input id="adminKey" type="password" autocomplete="current-password" placeholder="Enter admin password">
+        <button type="button" id="btnUnlock" class="btn-refresh btn-start">Open</button>
       </div>
-      <p id="gateError" class="error" hidden></p>
+      <p class="gate-hint">Use the administrator password from install (<code>/root/zasya-admin-password</code>).</p>
+      <p class="gate-error" id="gateError" hidden></p>
     </section>
-    <section id="panel" hidden>
-      <article>
-        <h2>Station</h2>
-        <p>Code: <strong id="stationCode">—</strong></p>
-        <p>Name: <strong id="stationName">—</strong></p>
-        <p>Licence: <strong id="licenceState">—</strong></p>
-      </article>
-      <article>
-        <h2>System</h2>
-        <pre id="systemStatus"></pre>
-      </article>
-      <article>
-        <h2>Platform overrides</h2>
-        <div id="platformList"></div>
-        <div class="row">
-          <input id="ovTrain" placeholder="Train no">
-          <input id="ovPlatform" placeholder="Platform">
-          <button type="button" id="btnOverride">Set</button>
-          <button type="button" id="btnClearAll">Clear all</button>
+
+    <section class="admin-panel" id="panel" hidden>
+      <div class="admin-summary">
+        <div class="stat">
+          <span class="stat-label">Active sessions</span>
+          <span class="stat-value" id="activeCount">0</span>
         </div>
-      </article>
-      <article>
-        <h2>Coach display</h2>
-        <pre id="coachDisplays"></pre>
-      </article>
-      <p><a href="verify.html">Verification screen</a></p>
+        <div class="stat">
+          <span class="stat-label">Live data</span>
+          <span class="stat-value" id="refreshState">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Station</span>
+          <span class="stat-value station-stat" id="currentStation">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Licence</span>
+          <span class="stat-value" id="licenceChip">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">NTES</span>
+          <span class="stat-value" id="ntesChip">—</span>
+        </div>
+        <div class="admin-actions">
+          <button type="button" id="btnRefreshList" class="btn-refresh btn-start">Refresh list</button>
+          <button type="button" id="btnStopAll" class="btn-refresh btn-stop">Stop all sessions</button>
+          <button type="button" id="btnServiceStart" class="btn-refresh btn-start">Start service</button>
+          <button type="button" id="btnServiceStop" class="btn-refresh btn-stop">Stop service</button>
+        </div>
+      </div>
+
+      <section class="station-card">
+        <h2>Display station</h2>
+        <p class="station-help">
+          Enter an NTES station code. Apply validates the code with NTES and sets the English name automatically.
+          Telugu/Hindi titles come from the curated station master when available.
+        </p>
+        <p class="station-help" id="stationPinnedHelp" hidden>
+          This appliance licence locks the station at install time. Platform overrides below still apply immediately.
+        </p>
+        <div class="station-row">
+          <label for="stationPreset">Preset</label>
+          <select id="stationPreset"></select>
+        </div>
+        <div class="station-row station-custom">
+          <label for="stationCodeInput">Code</label>
+          <input id="stationCodeInput" type="text" maxlength="6" placeholder="e.g. SC" autocomplete="off" spellcheck="false">
+          <label for="stationNameInput">English (NTES)</label>
+          <input id="stationNameInput" type="text" maxlength="80" placeholder="Resolved on Apply" autocomplete="off" readonly>
+          <button type="button" id="btnApplyStation" class="btn-refresh btn-start">Apply station</button>
+        </div>
+        <p class="station-resolved" id="stationResolved" hidden></p>
+        <p class="station-status" id="stationStatus" hidden></p>
+      </section>
+
+      <section class="station-card platform-card">
+        <h2>Platform overrides</h2>
+        <p class="station-help">
+          Last-minute PF changes for trains on the current board. Overrides apply immediately on the next display poll.
+        </p>
+        <div class="platform-actions">
+          <button type="button" id="btnRefreshPlatforms" class="btn-refresh btn-start">Refresh platforms</button>
+          <button type="button" id="btnClearAllPlatforms" class="btn-refresh btn-stop">Clear all overrides</button>
+        </div>
+        <table class="train-table admin-table platform-table">
+          <thead>
+            <tr>
+              <th>Train</th>
+              <th>Name</th>
+              <th>NTES PF</th>
+              <th>Override</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="platformBody">
+            <tr class="no-trains"><td colspan="5">Unlock admin to load platforms</td></tr>
+          </tbody>
+        </table>
+        <p class="station-status" id="platformStatus" hidden></p>
+      </section>
+
+      <table class="train-table admin-table">
+        <thead>
+          <tr>
+            <th>Session</th>
+            <th>Started</th>
+            <th>Running</th>
+            <th>Last seen</th>
+            <th>Browser</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="sessionBody">
+          <tr class="no-trains"><td colspan="6">No active sessions</td></tr>
+        </tbody>
+      </table>
+
+      <p class="admin-note">
+        A session is a browser tab on the display. Idle tabs drop off after ~90s.
+        Stopping a session blanks that tab. Start/Stop service pauses in-process refresh on laptop installs;
+        on this appliance NTES is the systemd poller (status above).
+      </p>
+      <p>
+        <a class="admin-link" href="/platform/">Open platform display →</a>
+        ·
+        <a class="admin-link" href="/coach/?station=BG&amp;display=entrance-main">Open coach display →</a>
+        ·
+        <a class="admin-link" href="verify.html">Verification screen →</a>
+      </p>
     </section>
   </main>
-  <script src="admin.js"></script>
+
+  <script src="/platform/config.js?v=20260825b"></script>
+  <script src="admin.js?v=20260825b"></script>
 </body>
 </html>
