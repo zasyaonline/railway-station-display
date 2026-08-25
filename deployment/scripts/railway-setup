@@ -149,6 +149,7 @@ install_files() {
   install -m 0755 "$SOURCE/deployment/kiosk/zasya-railway-display.sh" /usr/local/sbin/zasya-railway-display
   install -m 0755 "$SOURCE/deployment/scripts/railway-setup" /usr/local/sbin/railway-setup
   install -m 0755 "$SOURCE/deployment/scripts/acceptance.sh" /usr/local/sbin/railway-acceptance
+  install -m 0755 "$SOURCE/deployment/ubuntu/time-sync.sh" /usr/local/sbin/zasya-railway-time-sync
   install -m 0644 "$SOURCE/deployment/nginx/zasya-railway.conf" /etc/nginx/sites-available/zasya-railway
   ln -sfn /etc/nginx/sites-available/zasya-railway /etc/nginx/sites-enabled/zasya-railway
   rm -f /etc/nginx/sites-enabled/default
@@ -248,6 +249,9 @@ write_config() {
 }
 
 enable_services() {
+  note "==> Timezone and NTP (Asia/Kolkata, UTC+5:30)"
+  bash "$SOURCE/deployment/ubuntu/time-sync.sh" || fail "time-sync (chrony / Asia/Kolkata)"
+
   note "==> Services"
   export RAILWAY_ALLOW_SSH="${RAILWAY_ALLOW_SSH:-1}"
   bash "$ROOT/deployment/ubuntu/firewall.sh" || fail "firewall"

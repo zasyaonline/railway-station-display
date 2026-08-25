@@ -261,11 +261,19 @@ cmd_firewall() {
 
 cmd_timesync() {
   timedatectl >/dev/null || fail "timedatectl failed"
-  systemctl is-active --quiet chrony || systemctl is-active --quiet systemd-timesyncd || fail "no time-sync service active"
+  local tz
+  tz=$(timedatectl show -p Timezone --value 2>/dev/null || true)
+  [[ "$tz" == "Asia/Kolkata" ]] || fail "timezone is '${tz:-unknown}', expected Asia/Kolkata (UTC+5:30)"
+  systemctl is-active --quiet chrony || systemctl is-active --quiet chronyd || fail "chrony is not active"
+  if command -v chronyc >/dev/null 2>&1; then
+    if ! chronyc tracking 2>/dev/null | grep -qiE 'Leap status[[:space:]]*:[[:space:]]*Normal'; then
+      echo "WARN: chrony not yet Leap Normal (NTP may still be catching up)"
+    fi
+  fi
   local ts
   ts=$(health_json | json_get timeSync)
   [[ "$ts" != "invalid" ]] || fail "health reports invalid clock"
-  pass "time synchronization configured ($ts)"
+  pass "time synchronization Asia/Kolkata via chrony ($ts)"
 }
 
 cmd_logs() {

@@ -14,7 +14,7 @@ On the station PC or VM, as a user with sudo (git is installed for you):
 curl -fsSL https://raw.githubusercontent.com/zasyaonline/railway-station-display/main/deployment/ubuntu/bootstrap.sh | sudo bash
 ```
 
-That command installs **git**, clones this repo, installs Node.js 22 / nginx / Chromium, runs tests, applies the sample licence, and starts systemd + nginx on **port 80**.
+That command installs **git**, clones this repo, installs Node.js 22 / nginx / Chromium, sets **Asia/Kolkata (UTC+5:30)** and NTP via chrony, runs tests, applies the sample licence, and starts systemd + nginx on **port 80**.
 
 Proof of success is **nginx on port 80**. Do not use `npm start` as the production path. Local X/kiosk (HDMI Chromium) is best-effort; Platform, Coach, and Admin on `:80` are the install gate.
 
@@ -25,6 +25,28 @@ sudo apt-get update && sudo apt-get install -y git
 git clone https://github.com/zasyaonline/railway-station-display.git
 cd railway-station-display
 sudo bash deployment/ubuntu/install.sh
+```
+
+### Update an existing VM or physical PC
+
+Home clone (`~/railway-station-display`):
+
+```bash
+cd ~/railway-station-display && git pull --ff-only origin main && sudo bash deployment/ubuntu/install.sh
+```
+
+Bootstrap clone (`/opt/zasya/railway-src`):
+
+```bash
+sudo bash -c 'git -C /opt/zasya/railway-src pull --ff-only origin main && bash /opt/zasya/railway-src/deployment/ubuntu/install.sh'
+```
+
+`install.sh` reuses `/root/zasya-admin-password` if present. After install, hard-refresh the coach URL. Confirm clock:
+
+```bash
+timedatectl show -p Timezone --value   # Asia/Kolkata
+sudo railway-acceptance timesync
+curl -fsS http://127.0.0.1/health
 ```
 
 ### Zip instead of git clone
@@ -46,6 +68,8 @@ Replace `VM_IP` with the Ubuntu LAN address (`hostname -I` on the guest):
 | Health | `http://VM_IP/health` |
 
 Admin password is printed once at the end of install and saved as `/root/zasya-admin-password`.
+
+The appliance clock is **Asia/Kolkata (UTC+5:30)** and is kept in sync with the Indian NTP pool (`chrony`). Health `/health` reports `timeSync` from chrony (Leap Normal), not only `timedatectl NTPSynchronized`.
 
 ## Manual steps (if you do not want the one-shot installer)
 
@@ -71,6 +95,7 @@ Interactive setup asks for station, licence paths, NTES credentials (optional), 
 sudo railway-setup --validate-only
 sudo railway-acceptance urls
 sudo railway-acceptance services
+sudo railway-acceptance timesync
 sudo systemctl status zasya-railway.target
 curl -fsS http://127.0.0.1/health
 sudo journalctl -u zasya-railway-display -u zasya-railway-kiosk -n 80

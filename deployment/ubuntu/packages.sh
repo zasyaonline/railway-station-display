@@ -62,3 +62,6 @@ install_chromium
 
 systemctl enable chrony nginx
 systemctl disable --now bluetooth cups avahi-daemon 2>/dev/null || true
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bash "${SCRIPT_DIR}/time-sync.sh"

@@ -7,6 +7,9 @@ const LANG_MS = CONFIG.LANG_ROTATE_MS || 15000;
 const SESSION_KEY = 'coach_session_id';
 const BOGIE_DEFAULT = 25;
 const WALK_SPEED_MPS = 0.65;
+/** Full platform rake grid. Short trains occupy slots from the engine; the rest stay empty. */
+const PLATFORM_SLOTS = 26;
+const FOCUS_ROTATE_MS = 20000;
 
 let sessionStopped = false;
 
@@ -17,6 +20,10 @@ let typesDoc = { types: {} };
 let stationLayout = null;
 let stationsByNameMap = {};
 let lastPickMinute = -1;
+let focusRotateIndex = 0;
+let focusRotateTimer = null;
+let focusRotateKey = '';
+let skipFocusArrive = false;
 
 function $(id) { return document.getElementById(id); }
 function qs(name) {
@@ -135,10 +142,24 @@ function clockMinutesUntil(timeStr, now = new Date()) {
   if (diff > 720) diff -= 1440;
   return diff;
 }
+function ntesCancelled(row) {
+  return row?.runningState === 'cancelled' || /cancel/i.test(row?.status || '');
+}
+
+function ntesDeparted(row) {
+  if (row?.runningState === 'departed') return true;
+  return /^(departed|has departed)\b/i.test(String(row?.status || '').trim());
+}
+
 function liveMinutesUntil(train, hideAfter = 0) {
+  if (ntesDeparted(train)) {
+    const depGone = clockMinutesUntil(eventTime(train, 'dep'));
+    if (hideAfter > 0 && depGone != null && -depGone <= hideAfter) return 0;
+    return null;
+  }
   const arr = clockMinutesUntil(eventTime(train, 'arr'));
   const dep = clockMinutesUntil(eventTime(train, 'dep'));
-  if (dep != null && dep < 0 && -dep > hideAfter) return null;
+  if (dep != null && dep < 0) return 0;
   if (arr != null && arr > 0) return arr;
   if (dep != null && dep >= 0) return 0;
   if (arr != null && arr <= 0 && (dep == null || dep >= 0)) return 0;
@@ -179,22 +200,11 @@ function eventTime(train, kind) {
 }
 
 function rowDeparted(row, now, hideAfter) {
+  if (ntesCancelled(row)) return true;
+  if (!ntesDeparted(row)) return false;
   const dep = clockMinutesUntil(eventTime(row, 'dep'), now);
-  const arr = clockMinutesUntil(eventTime(row, 'arr'), now);
-  const status = String(row.status || '');
-  const atPlatform = row.runningState === 'arrived' || /arriv/i.test(status);
-
-  if (row.runningState === 'departed' || /depart/i.test(status)) {
-    if (hideAfter > 0 && dep != null && -dep <= hideAfter) return false;
-    return true;
-  }
-  if (atPlatform) {
-    return dep != null && dep < 0 && -dep > hideAfter;
-  }
-  // Late / scheduled: only treat as gone once departure has passed beyond hideAfter
-  if (dep != null && dep < 0 && -dep > hideAfter) return true;
-  if (arr != null && dep == null && arr < 0 && -arr > hideAfter) return true;
-  return false;
+  if (hideAfter > 0 && dep != null && -dep <= hideAfter) return false;
+  return true;
 }
 
 function cacheAgeMinutes(payload) {
@@ -238,42 +248,71 @@ function trainHasRake(t) {
   );
 }
 
-function pickLiveFocus(payload, now = new Date()) {
+function asBoardTrain(payload, row) {
+  const rake = (payload.boardRakes || {})[String(row.trainNo)] || {};
+  return Object.assign({}, rake, row, { trainNo: row.trainNo });
+}
+
+function trainInLiveWindow(t, now, showBefore, hideAfter) {
+  if (rowDeparted(t, now, hideAfter) || ntesCancelled(t)) return false;
+  const arr = clockMinutesUntil(eventTime(t, 'arr'), now);
+  const dep = clockMinutesUntil(eventTime(t, 'dep'), now);
+  const atPlatform = t.runningState === 'arrived' || /arriv/i.test(t.status || '');
+  if (atPlatform) return true;
+  if (dep != null && dep < 0) return true;
+  if (arr != null && arr <= 0 && (dep == null || dep >= 0)) return true;
+  const soonest = [arr, dep].filter((x) => x != null && x >= 0);
+  return Boolean(soonest.length && Math.min(...soonest) <= showBefore);
+}
+
+function scoreLiveTrain(t, now) {
+  const arr = clockMinutesUntil(eventTime(t, 'arr'), now);
+  const dep = clockMinutesUntil(eventTime(t, 'dep'), now);
+  const atPlatform = t.runningState === 'arrived' || /arriv/i.test(t.status || '');
+  if (atPlatform || (dep != null && dep < 0) || (arr != null && arr <= 0)) {
+    return { minutesUntil: 0, priority: atPlatform ? 0 : 1 };
+  }
+  const soonest = [arr, dep].filter((x) => x != null && x >= 0);
+  return { minutesUntil: soonest.length ? Math.min(...soonest) : 0, priority: 1 };
+}
+
+/** One live train per platform (T−10, standing, or delayed until NTES departed). */
+function overlappingFocusPicks(payload, now = new Date()) {
   const showBefore = payload.showBeforeMinutes ?? 10;
   const hideAfter = payload.hideAfterDepartMinutes ?? 0;
   const rows = payload.stationBoard || [];
-  const rakes = payload.boardRakes || {};
-
-  function asTrain(r) {
-    const rake = rakes[String(r.trainNo)] || {};
-    return Object.assign({}, rake, r, { trainNo: r.trainNo });
-  }
-
-  const inWindow = [];
+  const platforms = (payload.display?.platformsShown || []).map(String);
+  const byPf = new Map();
   for (const r of rows) {
-    const t = asTrain(r);
-    if (rowDeparted(t, now, hideAfter)) continue;
-    const arr = clockMinutesUntil(eventTime(t, 'arr'), now);
-    const dep = clockMinutesUntil(eventTime(t, 'dep'), now);
-    const atPlatform = t.runningState === 'arrived' || /arriv/i.test(t.status || '');
-    if (atPlatform && (dep == null || dep >= 0)) {
-      inWindow.push({ train: t, minutesUntil: 0, inWindow: true });
-      continue;
-    }
-    const soonest = [arr, dep].filter((x) => x != null && x >= 0);
-    const minPos = soonest.length ? Math.min(...soonest) : null;
-    if (minPos != null && minPos <= showBefore) {
-      inWindow.push({ train: t, minutesUntil: minPos, inWindow: true });
+    const t = asBoardTrain(payload, r);
+    if (platforms.length && !platforms.includes(String(t.platform))) continue;
+    if (!trainInLiveWindow(t, now, showBefore, hideAfter)) continue;
+    const scored = scoreLiveTrain(t, now);
+    const cand = { train: t, minutesUntil: scored.minutesUntil, inWindow: true, priority: scored.priority };
+    const key = String(t.platform);
+    const prev = byPf.get(key);
+    if (
+      !prev ||
+      cand.priority < prev.priority ||
+      (cand.priority === prev.priority && cand.minutesUntil < prev.minutesUntil)
+    ) {
+      byPf.set(key, cand);
     }
   }
-  inWindow.sort((a, b) => (a.minutesUntil ?? 999) - (b.minutesUntil ?? 999));
-  if (inWindow[0]) return inWindow[0];
+  return [...byPf.values()].sort((a, b) => Number(a.train.platform) - Number(b.train.platform));
+}
 
+function pickLiveFocus(payload, now = new Date()) {
+  const live = overlappingFocusPicks(payload, now);
+  if (live.length) return live[0];
+
+  const hideAfter = payload.hideAfterDepartMinutes ?? 0;
+  const rows = payload.stationBoard || [];
   let best = null;
   let bestWithRake = null;
   for (const r of rows) {
-    const t = asTrain(r);
-    if (rowDeparted(t, now, hideAfter)) continue;
+    const t = asBoardTrain(payload, r);
+    if (rowDeparted(t, now, hideAfter) || ntesCancelled(t)) continue;
     const arr = clockMinutesUntil(eventTime(t, 'arr'), now);
     const dep = clockMinutesUntil(eventTime(t, 'dep'), now);
     const m = [arr, dep].filter((x) => x != null && x >= 0);
@@ -288,9 +327,19 @@ function pickLiveFocus(payload, now = new Date()) {
   return bestWithRake || best;
 }
 
+function clampPlatformSlot(slot) {
+  return Math.max(0, Math.min(PLATFORM_SLOTS - 1, slot));
+}
+
+function padRakeSlots(coaches) {
+  const list = (coaches || []).map((c) => (c && typeof c === 'object' ? c : { empty: true }));
+  while (list.length < PLATFORM_SLOTS) list.push({ empty: true });
+  return list.slice(0, PLATFORM_SLOTS);
+}
+
 function resolveClientPin(display, platform, coaches, bogie) {
   const cfg = display?.youAreHere;
-  if (!cfg || !(coaches || []).length) {
+  if (!cfg) {
     return { enabled: false, slotIndex: null, platform: String(platform), samePlatform: false };
   }
   const samePlatform = String(cfg.platform) === String(platform);
@@ -299,7 +348,7 @@ function resolveClientPin(display, platform, coaches, bogie) {
     typeof cfg.slotIndex === 'number'
       ? cfg.slotIndex
       : Math.round((Number(cfg.metersFromEngineEnd) || 0) / bogieM);
-  slot = Math.max(0, Math.min(coaches.length - 1, slot));
+  slot = clampPlatformSlot(slot);
   return {
     enabled: samePlatform,
     slotIndex: samePlatform ? slot : null,
@@ -307,7 +356,8 @@ function resolveClientPin(display, platform, coaches, bogie) {
     configuredPlatform: String(cfg.platform || ''),
     samePlatform,
     facing: cfg.facing || 'engine_left',
-    metersFromEngineEnd: cfg.metersFromEngineEnd
+    metersFromEngineEnd: cfg.metersFromEngineEnd,
+    displaySlotIndex: slot
   };
 }
 
@@ -452,6 +502,9 @@ function ensureWalkMetrics(coaches, youAreHere, bogie) {
 }
 
 function coachTile(coach, pinSlot) {
+  if (!coach || coach.empty) {
+    return `<div class="coach coach-empty" aria-hidden="true"></div>`;
+  }
   const pos = coach.position != null ? coach.position : coach.seq - 1;
   const aligned = pinSlot != null && pos === pinSlot;
   const typeId = coach.typeId || 'unknown';
@@ -476,26 +529,8 @@ function coachTile(coach, pinSlot) {
     </div>`;
 }
 
-function walkStripHtml(coaches, pinEnabled, pinDisplayIndex) {
-  if (!pinEnabled || !coaches.length) return '';
-  const cells = coaches.map((c, i) => {
-    const dist = formatWalk(c.walkMeters, c.walkSeconds);
-    const time = formatWalkTime(c.walkMeters, c.walkSeconds);
-    const here = c.walkMeters === 0;
-    let sideClass = '';
-    if (!here && pinDisplayIndex != null) {
-      if (i < pinDisplayIndex) sideClass = ' walk-side-left';
-      else if (i > pinDisplayIndex) sideClass = ' walk-side-right';
-    }
-    return `
-      <div class="walk-cell${here ? ' is-here' : ''}${sideClass}">
-        <span class="walk-labels">
-          <span class="walk-dist">${esc(dist)}</span>
-          ${time ? `<span class="walk-time">${esc(time)}</span>` : ''}
-        </span>
-      </div>`;
-  }).join('');
-  return `<div class="walk-strip" aria-label="Walk distance">${cells}</div>`;
+function walkStripHtml() {
+  return '';
 }
 
 const AMENITY_ICON = {
@@ -574,14 +609,15 @@ function amenityMarkerForRake(amenity, engineOnRight) {
 
 /** Map survey marker to % along the coach rake (aligned with pin + engine side). */
 function amenityPctOnRake(markerMid, layout, platformId, coachCount, engineOnRight, youAreHere) {
+  const slots = coachCount > 0 ? coachCount : PLATFORM_SLOTS;
   const pinMarker = pinPlatformMarker(layout, displayId());
   const pinSlot = youAreHere.slotIndex;
   const engineM = engineOnRight ? pinMarker + pinSlot : pinMarker - pinSlot;
   let compSlot = engineOnRight ? engineM - markerMid : markerMid - engineM;
   compSlot = Math.round(compSlot);
-  compSlot = Math.max(0, Math.min(coachCount - 1, compSlot));
-  const displaySlot = engineOnRight ? coachCount - 1 - compSlot : compSlot;
-  return ((displaySlot + 0.5) / coachCount) * 100;
+  compSlot = Math.max(0, Math.min(slots - 1, compSlot));
+  const displaySlot = engineOnRight ? slots - 1 - compSlot : compSlot;
+  return ((displaySlot + 0.5) / slots) * 100;
 }
 
 function amenityPositionPct(markerMid, layout, platformId, coachCount, engineOnRight, youAreHere, pinAligned, amenity) {
@@ -638,8 +674,9 @@ function displaySidePlatform(youAreHere) {
 
 function displayPinSlot(youAreHere, bogie) {
   if (youAreHere?.slotIndex != null) return youAreHere.slotIndex;
+  if (youAreHere?.displaySlotIndex != null) return youAreHere.displaySlotIndex;
   if (typeof youAreHere?.metersFromEngineEnd === 'number') {
-    return Math.round(youAreHere.metersFromEngineEnd / (bogie || BOGIE_DEFAULT));
+    return clampPlatformSlot(Math.round(youAreHere.metersFromEngineEnd / (bogie || BOGIE_DEFAULT)));
   }
   return null;
 }
@@ -706,12 +743,12 @@ function fobAnchorPct(youAreHere, coachCount, engineOnRight, bogie, walkMeters) 
     pinSlot = Math.round(youAreHere.metersFromEngineEnd / bogieM);
   }
   if (pinSlot == null) pinSlot = 7;
-  if (!coachCount) return 50;
+  const slots = coachCount > 0 ? coachCount : PLATFORM_SLOTS;
   const offset = Math.round(walkMeters / bogieM);
   let targetSlot = pinSlot + offset;
-  targetSlot = Math.max(0, Math.min(coachCount - 1, targetSlot));
-  const displaySlot = engineOnRight ? coachCount - 1 - targetSlot : targetSlot;
-  return ((displaySlot + 0.5) / coachCount) * 100;
+  targetSlot = Math.max(0, Math.min(slots - 1, targetSlot));
+  const displaySlot = engineOnRight ? slots - 1 - targetSlot : targetSlot;
+  return ((displaySlot + 0.5) / slots) * 100;
 }
 
 function fobBridgeOverlayHtml(
@@ -810,12 +847,8 @@ function crossPlatformNoteHtml(youAreHere, trainPlatform, layout) {
   const ctx = crossPlatformFobContext(youAreHere, trainPlatform, layout);
   if (!ctx) return '';
   const fobName = amenityLabel(ctx.entry);
-  const dist = `${Math.round(ctx.walkMeters)}${t('meters')}`;
-  const time = formatWalkTime(ctx.walkMeters, ctx.walkSeconds);
+  const tvPf = displaySidePlatform(youAreHere);
   if (THEME === 'premium') {
-    const walkLine = t('wayfindWalkSummary')
-      .replace('{dist}', esc(dist))
-      .replace('{time}', esc(time));
     const detail = t('wayfindFobDetail')
       .replace('{fob}', esc(fobName))
       .replace('{n}', esc(String(trainPlatform)));
@@ -823,29 +856,27 @@ function crossPlatformNoteHtml(youAreHere, trainPlatform, layout) {
       <aside class="wayfind-panel" role="status">
         <div class="wayfind-pf"><small>${esc(t('platform'))}</small>${esc(String(trainPlatform))}</div>
         <div class="wayfind-copy">
-          <div class="wayfind-walk">${walkLine}</div>
-          <div class="wayfind-detail">${detail}</div>
+          <div class="wayfind-detail">${esc(t('youAreHere'))} · ${esc(t('platform'))} ${esc(tvPf)}. ${detail}</div>
         </div>
       </aside>`;
   }
   const line1 = t('trainOnPlatform').replace('{n}', esc(String(trainPlatform)));
-  const line2 = t('useFobToReachWithWalk')
+  const line2 = t('useFobToReach')
     .replace('{fob}', esc(fobName))
-    .replace('{n}', esc(String(trainPlatform)))
-    .replace('{dist}', esc(dist))
-    .replace('{time}', esc(time));
+    .replace('{n}', esc(String(trainPlatform)));
   return `<p class="pin-note pin-note-cross">${line1}<br>${line2}</p>`;
 }
 
 function platformHtml(youAreHere, coaches, engineOnRight, platformId, layout, walkPinSlot, trainPlatform, bogie) {
-  const count = coaches.length;
-  const pinEnabled = walkPinSlot != null && count;
+  const count = PLATFORM_SLOTS;
+  const pinEnabled = walkPinSlot != null;
   let pinDisplayIndex = null;
   let pin = '';
   if (pinEnabled) {
+    const pinSlot = clampPlatformSlot(walkPinSlot);
     pinDisplayIndex = engineOnRight
-      ? count - 1 - walkPinSlot
-      : walkPinSlot;
+      ? count - 1 - pinSlot
+      : pinSlot;
     const pct = ((pinDisplayIndex + 0.5) / count) * 100;
     pin = `
       <div class="you-pin" style="left:${pct}%">
@@ -957,13 +988,37 @@ function headingBanner(heading) {
   return `<div class="heading-banner heading-unknown">${towardBits}</div>`;
 }
 
+function ensureFocusRotation() {
+  if (focusRotateTimer) return;
+  focusRotateTimer = setInterval(() => {
+    if (!lastPayload) return;
+    const live = overlappingFocusPicks(lastPayload);
+    if (live.length <= 1) return;
+    focusRotateIndex = (focusRotateIndex + 1) % live.length;
+    skipFocusArrive = true;
+    render(lastPayload);
+    skipFocusArrive = false;
+  }, FOCUS_ROTATE_MS);
+}
+
 function resolveFocusForRender(payload) {
+  const live = overlappingFocusPicks(payload);
+  const key = live.map((p) => `${p.train.trainNo}@${p.train.platform}`).join('|');
+  if (key !== focusRotateKey) {
+    focusRotateKey = key;
+    if (!live.length || focusRotateIndex >= live.length) focusRotateIndex = 0;
+  }
+  ensureFocusRotation();
+  if (live.length) {
+    return assembleFocus(payload, live[focusRotateIndex % live.length]);
+  }
+
   const pick = pickLiveFocus(payload);
   if (pick) return assembleFocus(payload, pick);
 
   const serverFocus = payload?.focus;
   if (serverFocus?.train && (serverFocus.coaches?.length || serverFocus.compositionAvailable)) {
-  const hideAfter = payload.hideAfterDepartMinutes ?? 0;
+    const hideAfter = payload.hideAfterDepartMinutes ?? 0;
     const now = new Date();
     if (!rowDeparted(serverFocus.train, now, hideAfter)) {
       return serverFocus;
@@ -1084,11 +1139,12 @@ function renderFocus(p, bogie, shouldArrive) {
     walkPinSlot != null ? { enabled: true, slotIndex: walkPinSlot } : { enabled: false, slotIndex: null },
     bogie
   );
-  const coaches = engineOnRight ? [...withWalk].reverse() : withWalk;
+  const padded = padRakeSlots(withWalk);
+  const coaches = engineOnRight ? [...padded].reverse() : padded;
   const tiles = coaches.map((c) => coachTile(c, highlightPin)).join('');
   const arriveClass = shouldArrive ? 'is-arriving' : '';
   const rakeClass = `rake ${engineOnRight ? 'engine-right' : 'engine-left'} ${arriveClass}`.trim();
-  const count = p.coaches.length;
+  const count = PLATFORM_SLOTS;
   const pinNote = crossPlatformNoteHtml(p.youAreHere, p.platform, stationLayout);
 
   return `
@@ -1195,7 +1251,7 @@ function render(payload) {
     .replace('{bogie}', String(payload.bogieLengthMeters ?? 25))
     .replace('{coaches}', String(focus?.coachCount || '—'));
   const focusKey = focus?.train?.trainNo ? `${focus.train.trainNo}@${focus.platform}` : '';
-  const shouldArrive = Boolean(focusKey && focusKey !== window.__coachFocusKey);
+  const shouldArrive = Boolean(!skipFocusArrive && focusKey && focusKey !== window.__coachFocusKey);
   if (focusKey) window.__coachFocusKey = focusKey;
 
   const board = $('board');

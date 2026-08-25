@@ -1,8 +1,9 @@
 'use strict';
 
 /**
- * Live-board window: feature coaches from T−showBefore until departure.
- * Once departure time has passed, the train is gone (hideAfterDepartMinutes = 0).
+ * Live-board window: feature coaches from T−showBefore until the train has
+ * actually left (NTES departed). Clock departure in the past is not enough —
+ * delayed trains stay on the board until NTES marks them departed.
  */
 
 function timeToMinutes(timeStr) {
@@ -22,10 +23,9 @@ function minutesUntil(timeStr, now = new Date()) {
   return diff;
 }
 
-function hasDeparted(train, now = new Date()) {
-  if (train.runningState === 'departed' || /depart/i.test(train.status || '')) return true;
-  const dep = minutesUntil(train.expectedDeparture || train.scheduledDeparture, now);
-  return dep != null && dep < 0;
+function hasDeparted(train) {
+  if (train.runningState === 'departed') return true;
+  return /^(departed|has departed)\b/i.test(String(train.status || '').trim());
 }
 
 /**
@@ -52,7 +52,13 @@ function pickTrainForPlatform(boardTrains, platform, showBeforeMinutes, hideAfte
         inWindow = true;
         minutesUntilEvent = dep;
       }
-    } else if (atPlatform && (dep == null || dep >= 0)) {
+    } else if (atPlatform) {
+      inWindow = true;
+      minutesUntilEvent = 0;
+    } else if (dep != null && dep < 0) {
+      inWindow = true;
+      minutesUntilEvent = 0;
+    } else if (arr != null && arr <= 0 && (dep == null || dep >= 0)) {
       inWindow = true;
       minutesUntilEvent = 0;
     } else {

@@ -193,6 +193,12 @@ body.theme-premium .coach {
   --tile-fs: clamp(0.45rem, calc(96vw / var(--coach-count) / 6.8), 1.05rem);
 }
 
+body.theme-premium .coach.coach-empty {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
 body.theme-premium .coach .num {
   position: absolute;
   top: 0.08rem;
@@ -337,9 +343,7 @@ body.theme-premium .platform-wayfind {
 }
 
 body.theme-premium .walk-strip {
-  flex-shrink: 0;
-  /* Match current TV glyph metrics (Inter is wider when rotated). */
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  display: none;
 }
 
 body.theme-premium .walk-cell {

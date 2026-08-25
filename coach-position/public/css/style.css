@@ -285,7 +285,7 @@ body {
   min-height: 0;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
-  --coach-count: 12;
+  --coach-count: 26;
   --coach-gap: 1px;
   padding-bottom: 0;
   overflow: hidden;
@@ -420,6 +420,13 @@ body {
   max-height: min(100%, calc(92vw / var(--coach-count) * 1.15));
   object-fit: contain;
   display: block;
+  pointer-events: none;
+}
+
+.coach.coach-empty {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -615,7 +622,7 @@ body {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  --coach-count: 12;
+  --coach-count: 26;
 }
 
 .platform-coping {
@@ -854,18 +861,7 @@ body {
 }
 
 .walk-strip {
-  position: relative;
-  z-index: 9;
-  display: flex;
-  width: 100%;
-  gap: var(--coach-gap, 1px);
-  margin-top: 0.35rem;
-  margin-bottom: 0.1rem;
-  pointer-events: none;
-  flex-shrink: 0;
-  min-height: clamp(3rem, 6.5vh, 4.2rem);
-  align-items: center;
-  overflow: visible;
+  display: none;
 }
 
 .walk-cell {
