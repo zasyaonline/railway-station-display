@@ -1,0 +1,262 @@
+[
+  {
+    "trainNo": "18046",
+    "trainName": "East Coast Express",
+    "from": "Charlapalli",
+    "to": "Howrah",
+    "arrival": "--",
+    "departure": "08:40",
+    "days": "Daily",
+    "defaultPlatform": "6"
+  },
+  {
+    "trainNo": "17229",
+    "trainName": "Sabari Express",
+    "from": "Thiruvananthapuram",
+    "to": "Secunderabad",
+    "arrival": "11:34",
+    "departure": "11:35",
+    "days": "Daily",
+    "defaultPlatform": "2"
+  },
+  {
+    "trainNo": "17230",
+    "trainName": "Sabari Express",
+    "from": "Secunderabad",
+    "to": "Thiruvananthapuram",
+    "arrival": "12:01",
+    "departure": "12:02",
+    "days": "Daily",
+    "defaultPlatform": "3"
+  },
+  {
+    "trainNo": "12704",
+    "trainName": "Falaknuma Express",
+    "from": "Secunderabad",
+    "to": "Howrah",
+    "arrival": "15:53",
+    "departure": "15:55",
+    "days": "Daily",
+    "defaultPlatform": "3"
+  },
+  {
+    "trainNo": "12705",
+    "trainName": "Guntur - Secunderabad Intercity",
+    "from": "Guntur",
+    "to": "Secunderabad",
+    "arrival": "21:44",
+    "departure": "21:45",
+    "days": "Daily",
+    "defaultPlatform": "1"
+  },
+  {
+    "trainNo": "17405",
+    "trainName": "Krishna Express",
+    "from": "Tirupati",
+    "to": "Adilabad",
+    "arrival": "19:39",
+    "departure": "19:40",
+    "days": "Daily",
+    "defaultPlatform": "2"
+  },
+  {
+    "trainNo": "17406",
+    "trainName": "Krishna Express",
+    "from": "Adilabad",
+    "to": "Tirupati",
+    "arrival": "06:21",
+    "departure": "06:22",
+    "days": "Daily",
+    "defaultPlatform": "4"
+  },
+  {
+    "trainNo": "12758",
+    "trainName": "Bhagyanagar SF Express",
+    "from": "Sirpur Kaghaznagar",
+    "to": "Secunderabad",
+    "arrival": "19:49",
+    "departure": "19:50",
+    "days": "Daily",
+    "defaultPlatform": "1"
+  },
+  {
+    "trainNo": "18520",
+    "trainName": "LTT - Visakhapatnam Express",
+    "from": "Mumbai LTT",
+    "to": "Visakhapatnam",
+    "arrival": "20:58",
+    "departure": "21:00",
+    "days": "Daily",
+    "defaultPlatform": "5"
+  },
+  {
+    "trainNo": "17625",
+    "trainName": "Kacheguda - Repalle Express",
+    "from": "Kacheguda",
+    "to": "Repalle",
+    "arrival": "22:52",
+    "departure": "22:53",
+    "days": "Daily",
+    "defaultPlatform": "2"
+  },
+  {
+    "trainNo": "17626",
+    "trainName": "Repalle - Secunderabad Express",
+    "from": "Repalle",
+    "to": "Secunderabad",
+    "arrival": "05:49",
+    "departure": "05:50",
+    "days": "Daily",
+    "defaultPlatform": "3"
+  },
+  {
+    "trainNo": "57625",
+    "trainName": "Kakatiya Fast Passenger",
+    "from": "Secunderabad",
+    "to": "Manuguru",
+    "arrival": "18:57",
+    "departure": "18:58",
+    "days": "Daily",
+    "defaultPlatform": "4"
+  },
+  {
+    "trainNo": "57626",
+    "trainName": "Kakatiya Fast Passenger",
+    "from": "Manuguru",
+    "to": "Secunderabad",
+    "arrival": "08:23",
+    "departure": "08:24",
+    "days": "Daily",
+    "defaultPlatform": "1"
+  },
+  {
+    "trainNo": "67775",
+    "trainName": "KCG - MRGA MEMU",
+    "from": "Kacheguda",
+    "to": "Miryalaguda",
+    "arrival": "20:03",
+    "departure": "20:04",
+    "days": "Daily",
+    "defaultPlatform": "6"
+  },
+  {
+    "trainNo": "67780",
+    "trainName": "NDKD - KCG DMU",
+    "from": "Nadikode",
+    "to": "Kacheguda",
+    "arrival": "20:11",
+    "departure": "20:12",
+    "days": "Daily",
+    "defaultPlatform": "5"
+  },
+  {
+    "trainNo": "67264",
+    "trainName": "Secunderabad - Warangal MEMU",
+    "from": "Secunderabad",
+    "to": "Warangal",
+    "arrival": "09:34",
+    "departure": "09:35",
+    "days": "Daily",
+    "defaultPlatform": "2"
+  },
+  {
+    "trainNo": "67265",
+    "trainName": "Warangal - Secunderabad MEMU",
+    "from": "Warangal",
+    "to": "Secunderabad",
+    "arrival": "07:51",
+    "departure": "07:52",
+    "days": "Daily",
+    "defaultPlatform": "3"
+  },
+  {
+    "trainNo": "67275",
+    "trainName": "Falaknuma - Bhongir MEMU",
+    "from": "Falaknuma",
+    "to": "Bhongir",
+    "arrival": "09:39",
+    "departure": "09:40",
+    "days": "Daily",
+    "defaultPlatform": "1"
+  },
+  {
+    "trainNo": "67276",
+    "trainName": "Bhongir - Falaknuma MEMU",
+    "from": "Bhongir",
+    "to": "Falaknuma",
+    "arrival": "09:39",
+    "departure": "09:40",
+    "days": "Mon,Tue,Wed,Thu,Fri,Sat",
+    "defaultPlatform": "2"
+  },
+  {
+    "trainNo": "15673",
+    "trainName": "Charlapalli - Kamakhya Amrit Bharat",
+    "from": "Charlapalli",
+    "to": "Kamakhya",
+    "arrival": "--",
+    "departure": "--",
+    "days": "Specific",
+    "defaultPlatform": "6"
+  },
+  {
+    "trainNo": "15674",
+    "trainName": "Kamakhya - Charlapalli Amrit Bharat",
+    "from": "Kamakhya",
+    "to": "Charlapalli",
+    "arrival": "--",
+    "departure": "--",
+    "days": "Specific",
+    "defaultPlatform": "6"
+  },
+  {
+    "trainNo": "16357",
+    "trainName": "Nagercoil - Charlapalli Amrit Bharat Special",
+    "from": "Nagercoil",
+    "to": "Charlapalli",
+    "arrival": "--",
+    "departure": "--",
+    "days": "Specific",
+    "defaultPlatform": "6"
+  },
+  {
+    "trainNo": "07000",
+    "trainName": "Tirupati - Charlapalli Special",
+    "from": "Tirupati",
+    "to": "Charlapalli",
+    "arrival": "--",
+    "departure": "--",
+    "days": "Specific",
+    "defaultPlatform": "6"
+  },
+  {
+    "trainNo": "07704",
+    "trainName": "Shalimar - Charlapalli Special",
+    "from": "Shalimar",
+    "to": "Charlapalli",
+    "arrival": "--",
+    "departure": "--",
+    "days": "Specific",
+    "defaultPlatform": "6"
+  },
+  {
+    "trainNo": "03225",
+    "trainName": "Danapur - Charlapalli Special Fare",
+    "from": "Danapur",
+    "to": "Charlapalli",
+    "arrival": "--",
+    "departure": "--",
+    "days": "Specific",
+    "defaultPlatform": "6"
+  },
+  {
+    "trainNo": "03226",
+    "trainName": "Charlapalli - Danapur Special Fare",
+    "from": "Charlapalli",
+    "to": "Danapur",
+    "arrival": "--",
+    "departure": "--",
+    "days": "Specific",
+    "defaultPlatform": "6"
+  }
+]

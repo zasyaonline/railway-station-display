@@ -1,0 +1,20 @@
+[Unit]
+Description=Zasya Railway Admin
+PartOf=zasya-railway.target
+After=zasya-railway-platform.service zasya-railway-coach.service
+
+[Service]
+Type=simple
+User=zasya-admin
+Group=zasya
+WorkingDirectory=/opt/zasya/railway
+Environment=RAILWAY_APPLIANCE=1
+Environment=ADMIN_PORT=3002
+Environment=BIND_HOST=127.0.0.1
+ExecStart=/usr/bin/node /opt/zasya/railway/edge/admin/server.js
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=zasya-railway.target

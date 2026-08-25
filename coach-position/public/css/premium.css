@@ -1,0 +1,588 @@
+/* Premium TV theme — presentation only. Shares app.js logic with the current TV view. */
+body.theme-premium {
+  --p-bg: #081b33;
+  --p-panel: #102a4d;
+  --p-panel-2: #123a5f;
+  --p-accent: #00aeef;
+  --p-highlight: #ffb703;
+  --p-text: #ffffff;
+  --p-muted: #afc4d8;
+  --p-edge: rgba(255, 183, 3, 0.55);
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(0, 174, 239, 0.12), transparent 55%),
+    linear-gradient(180deg, #0a2038 0%, var(--p-bg) 40%, #061426 100%);
+  color: var(--p-text);
+}
+
+body.theme-premium .header {
+  background: linear-gradient(180deg, rgba(16, 42, 77, 0.95), rgba(8, 27, 51, 0.88));
+  border-bottom: 1px solid rgba(0, 174, 239, 0.22);
+  padding: 0.55rem 1.4rem;
+  gap: 1rem;
+}
+
+body.theme-premium .header h1 {
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+  letter-spacing: 0.04em;
+  font-weight: 800;
+}
+
+body.theme-premium .subtitle {
+  color: var(--p-muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+body.theme-premium .clock {
+  color: var(--p-highlight);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.45rem, 2.8vw, 2.1rem);
+}
+
+body.theme-premium .clock-date,
+body.theme-premium .lang {
+  color: var(--p-muted);
+}
+
+body.theme-premium .lang {
+  border: 1px solid rgba(175, 196, 216, 0.35);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-weight: 700;
+}
+
+body.theme-premium .board {
+  gap: 0.35rem;
+  padding: 0.4rem 1rem 0.3rem;
+}
+
+body.theme-premium .station-board-panel {
+  background: rgba(16, 42, 77, 0.72);
+  border: 1px solid rgba(0, 174, 239, 0.18);
+  border-radius: 14px;
+  max-height: min(34%, 14rem);
+  flex: 0 1 auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+body.theme-premium .station-board th,
+body.theme-premium .station-board td {
+  padding: 0.28rem 0.45rem;
+  font-size: clamp(0.78rem, 1.15vw, 0.95rem);
+}
+
+body.theme-premium .station-board tr.is-focus {
+  background: linear-gradient(90deg, rgba(255, 183, 3, 0.22), rgba(255, 183, 3, 0.04));
+}
+
+body.theme-premium .station-board .pf {
+  color: var(--p-highlight);
+}
+
+body.theme-premium .focus-panel {
+  background: linear-gradient(180deg, rgba(18, 58, 95, 0.55), rgba(8, 27, 51, 0.35));
+  border: 1px solid rgba(0, 174, 239, 0.2);
+  border-radius: 16px;
+  padding: 0.45rem 0.85rem 0.4rem;
+  gap: 0.28rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+body.theme-premium .focus-kicker {
+  color: var(--p-highlight);
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+}
+
+body.theme-premium .focus-main {
+  align-items: center;
+}
+
+body.theme-premium .focus-id {
+  font-size: clamp(1.25rem, 2.3vw, 1.85rem);
+  gap: 0.75rem;
+}
+
+body.theme-premium .focus-id strong {
+  color: var(--p-highlight);
+  font-size: 1.15em;
+  letter-spacing: 0.02em;
+}
+
+body.theme-premium .focus-id span {
+  color: var(--p-text);
+  font-weight: 600;
+}
+
+body.theme-premium .focus-meta .pill {
+  background: var(--p-highlight);
+  color: #081b33;
+  font-size: 1.05em;
+  padding: 0.28rem 0.7rem;
+  border-radius: 8px;
+  box-shadow: 0 0 18px rgba(255, 183, 3, 0.28);
+}
+
+body.theme-premium .focus-meta .eta {
+  color: var(--p-highlight);
+  font-size: 1.2em;
+}
+
+body.theme-premium .heading-banner {
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(0, 174, 239, 0.18), rgba(16, 42, 77, 0.2), rgba(0, 174, 239, 0.12));
+  border: 1px solid rgba(0, 174, 239, 0.35);
+  padding: 0.28rem 0.85rem;
+}
+
+body.theme-premium .heading-banner .dest {
+  color: #fff;
+  font-weight: 800;
+}
+
+body.theme-premium .heading-banner .towards-label {
+  color: var(--p-accent);
+}
+
+body.theme-premium .heading-banner .motion {
+  color: var(--p-accent);
+}
+
+body.theme-premium .divyangjan-banner {
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(0, 174, 239, 0.22), rgba(0, 174, 239, 0.08));
+  border: 1px solid rgba(0, 174, 239, 0.45);
+  color: #e0f7ff;
+  font-size: clamp(0.8rem, 1.3vw, 1rem);
+  padding: 0.32rem 0.75rem;
+}
+
+/* —— Map composition: give platform enough height for frozen walk labels —— */
+body.theme-premium .rake-wrap {
+  min-height: 0;
+  gap: 0.25rem;
+}
+
+body.theme-premium .rake-stage {
+  display: grid;
+  /* Platform row must fit yellow line + walk band + pin (same as current TV). */
+  grid-template-rows: minmax(0, 0.9fr) auto minmax(0, 1.25fr);
+  border-radius: 14px;
+  overflow: visible;
+  background:
+    linear-gradient(180deg, rgba(8, 27, 51, 0.2), rgba(8, 27, 51, 0.55));
+  border: 1px solid rgba(0, 174, 239, 0.12);
+}
+
+body.theme-premium .rake {
+  padding: 0.35rem 0.35rem 0.15rem;
+  gap: 2px;
+  align-items: stretch;
+  height: 100%;
+}
+
+body.theme-premium .coach {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(12, 28, 48, 0.75), rgba(6, 16, 30, 0.85));
+  padding: 0.1rem 0.05rem 0.18rem;
+  gap: 0.05rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  --tile-fs: clamp(0.45rem, calc(96vw / var(--coach-count) / 6.8), 1.05rem);
+}
+
+body.theme-premium .coach .num {
+  position: absolute;
+  top: 0.08rem;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: clamp(1.05rem, calc(70vw / var(--coach-count) / 5), 1.85rem);
+  height: clamp(1.05rem, calc(70vw / var(--coach-count) / 5), 1.85rem);
+  background: var(--p-highlight);
+  color: #081b33;
+  font-size: clamp(0.62rem, calc(70vw / var(--coach-count) / 6.2), 1rem);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  z-index: 12;
+}
+
+body.theme-premium .coach-art {
+  margin-top: clamp(0.95rem, 1.8vh, 1.35rem);
+  max-height: min(100%, calc(92vw / var(--coach-count) * 1.2));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
+body.theme-premium .coach .code {
+  background: rgba(8, 16, 32, 0.92);
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+body.theme-premium .coach .kind {
+  color: var(--p-muted);
+  font-size: clamp(0.38rem, calc(var(--tile-fs) * 0.7), 0.7rem);
+}
+
+body.theme-premium .coach.pin-aligned {
+  border-color: var(--p-highlight);
+  background: linear-gradient(180deg, rgba(255, 183, 3, 0.18), rgba(12, 28, 48, 0.9));
+  box-shadow:
+    0 0 0 2px rgba(255, 183, 3, 0.85),
+    0 0 22px rgba(255, 183, 3, 0.35);
+}
+
+body.theme-premium .coach.pin-aligned::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -0.35rem;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 0.35rem solid transparent;
+  border-right: 0.35rem solid transparent;
+  border-top: 0.4rem solid var(--p-highlight);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
+body.theme-premium .coach.divyangjan {
+  box-shadow: 0 0 0 2px #00aeef, 0 0 16px rgba(0, 174, 239, 0.35);
+  border-color: #00aeef;
+}
+
+body.theme-premium .coach.divyangjan.pin-aligned {
+  box-shadow:
+    0 0 0 2px var(--p-highlight),
+    0 0 0 5px rgba(0, 174, 239, 0.8),
+    0 0 20px rgba(255, 183, 3, 0.3);
+}
+
+body.theme-premium .track {
+  height: clamp(0.95rem, 1.6vh, 1.25rem);
+  background: linear-gradient(180deg, #1a2f48, #0d1c2e);
+}
+
+body.theme-premium .platform {
+  min-height: 0;
+}
+
+body.theme-premium .platform-coping {
+  height: 0.28rem;
+  background: linear-gradient(180deg, #7b8aa3, #3d4a5e);
+}
+
+body.theme-premium .platform-deck {
+  background:
+    linear-gradient(180deg, rgba(63, 84, 112, 0.95) 0%, rgba(36, 52, 74, 0.98) 32%, #182636 100%);
+  border-color: #4a5d78;
+  box-shadow:
+    inset 0 10px 18px rgba(0, 0, 0, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  padding: 0.25rem 0.2rem 0.2rem;
+}
+
+body.theme-premium .platform-grain {
+  opacity: 0.45;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 22px,
+      rgba(255, 255, 255, 0.035) 22px,
+      rgba(255, 255, 255, 0.035) 23px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 12px,
+      rgba(0, 0, 0, 0.07) 12px,
+      rgba(0, 0, 0, 0.07) 13px
+    );
+}
+
+body.theme-premium .yellow-line {
+  top: 0.4rem;
+  height: 0.28rem;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--p-highlight) 0 14px,
+    #0b1220 14px 20px
+  );
+  box-shadow: 0 0 10px rgba(255, 183, 3, 0.4);
+}
+
+body.theme-premium .bay-ticks {
+  top: 0.72rem;
+}
+
+body.theme-premium .bay-tick {
+  border-left-color: rgba(255, 183, 3, 0.35);
+  height: 0.7rem;
+}
+
+/*
+ * Walk distance/time — inherit FROZEN layout from style.css (match current TV).
+ * Do not override rotation, font-size, or stack order here.
+ */
+body.theme-premium .platform-deck {
+  overflow: visible;
+}
+
+body.theme-premium .platform-wayfind {
+  /* Extra top clearance so rotated glyphs stay below the yellow line. */
+  margin-top: 1.35rem;
+  overflow: visible;
+}
+
+body.theme-premium .walk-strip {
+  flex-shrink: 0;
+  /* Match current TV glyph metrics (Inter is wider when rotated). */
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+body.theme-premium .walk-cell {
+  border-left-color: rgba(175, 196, 216, 0.18);
+}
+
+body.theme-premium .walk-cell .walk-dist {
+  color: #e8eef6;
+}
+
+body.theme-premium .walk-cell .walk-time {
+  color: #7dd3fc;
+}
+
+body.theme-premium .walk-cell.is-here .walk-dist {
+  color: var(--p-highlight);
+}
+
+/* Traveller sized so it does not steal the walk-label band (match current TV feel). */
+body.theme-premium .pin-row {
+  height: clamp(3.2rem, 7vh, 4.2rem);
+  overflow: visible;
+  z-index: 16;
+  flex-shrink: 0;
+}
+
+body.theme-premium .you-pin {
+  animation: premiumPinPulse 2.2s ease-in-out infinite;
+  max-width: min(36vw, 12rem);
+  gap: 0.1rem;
+  flex-direction: column;
+  bottom: 0.15rem;
+  z-index: 16;
+}
+
+body.theme-premium .you-pin .pin-cluster {
+  order: 2;
+  margin-top: 0.04rem;
+  background: rgba(8, 27, 51, 0.92);
+  border: 1.5px solid rgba(255, 183, 3, 0.65);
+  box-shadow: 0 0 16px rgba(255, 183, 3, 0.25);
+  padding: 0.15rem 0.5rem;
+}
+
+body.theme-premium .you-pin .pin-cluster .label {
+  font-size: clamp(0.68rem, 1.4vw, 0.88rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--p-highlight);
+}
+
+body.theme-premium .you-pin .arrow {
+  display: none;
+}
+
+body.theme-premium .you-pin .traveler {
+  order: 1;
+  height: clamp(2.6rem, 6vh, 3.4rem);
+  max-height: none;
+  filter:
+    drop-shadow(0 0 10px rgba(255, 183, 3, 0.35))
+    drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
+}
+
+@keyframes premiumPinPulse {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+/* Facilities — keep near current-TV scale so walk band is not crushed */
+body.theme-premium .amenity-strip.amenity-building {
+  height: clamp(2.4rem, 5.2vh, 3.2rem);
+  margin: 0.05rem 0.35rem 0.12rem;
+  z-index: 12;
+}
+
+body.theme-premium .amenity-strip.amenity-track {
+  height: clamp(1.5rem, 3.4vh, 2rem);
+  z-index: 12;
+}
+
+body.theme-premium .amenity-axis {
+  background: rgba(0, 174, 239, 0.25);
+  top: auto;
+  bottom: 0.15rem;
+}
+
+body.theme-premium .amenity-pin {
+  gap: 0.08rem;
+  max-width: min(16vw, 6rem);
+}
+
+body.theme-premium .amenity-icon {
+  width: clamp(1.7rem, 3.6vw, 2.6rem);
+  max-height: clamp(2rem, 4.4vh, 2.9rem);
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.45));
+}
+
+body.theme-premium .amenity-label {
+  font-size: clamp(0.58rem, calc(72vw / var(--coach-count) / 6), 0.88rem);
+  color: #d7e4f2;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  max-width: min(16vw, 6rem);
+}
+
+body.theme-premium .amenity-icon-wrap {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+body.theme-premium .amenity-access-badge {
+  position: absolute;
+  right: -0.3rem;
+  bottom: -0.1rem;
+  width: clamp(0.9rem, 1.8vw, 1.2rem);
+  height: clamp(0.9rem, 1.8vw, 1.2rem);
+  border-radius: 999px;
+  background: var(--p-accent);
+  color: #fff;
+  font-size: clamp(0.55rem, 1.1vw, 0.75rem);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #e0f7ff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* FOB on amenities / far platform edge */
+body.theme-premium .fob-bridge-overlay {
+  top: auto;
+  bottom: 0.1rem;
+  width: min(15%, 180px);
+  height: min(40%, 145px);
+  z-index: 7;
+  filter: drop-shadow(0 0 10px rgba(0, 174, 239, 0.22));
+}
+
+body.theme-premium .fob-bridge-art {
+  opacity: 0.8;
+  object-position: left bottom;
+}
+
+body.theme-premium .walk-strip,
+body.theme-premium .pin-row,
+body.theme-premium .amenity-strip,
+body.theme-premium .platform-wayfind {
+  z-index: 12;
+}
+
+/* Wayfinding instruction panel */
+body.theme-premium .pin-note-cross,
+body.theme-premium .wayfind-panel {
+  margin: 0.15rem 0 0;
+  text-align: left;
+  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+  background: linear-gradient(90deg, rgba(255, 183, 3, 0.14), rgba(16, 42, 77, 0.55));
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  color: #fff7e6;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+body.theme-premium .wayfind-panel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem 0.85rem;
+  align-items: center;
+}
+
+body.theme-premium .wayfind-pf {
+  background: var(--p-highlight);
+  color: #081b33;
+  font-weight: 800;
+  font-size: clamp(0.95rem, 1.8vw, 1.25rem);
+  padding: 0.45rem 0.7rem;
+  border-radius: 10px;
+  letter-spacing: 0.03em;
+  text-align: center;
+  line-height: 1.15;
+}
+
+body.theme-premium .wayfind-pf small {
+  display: block;
+  font-size: 0.62em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+body.theme-premium .wayfind-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+body.theme-premium .wayfind-copy .wayfind-walk {
+  font-size: clamp(0.95rem, 1.7vw, 1.2rem);
+  font-weight: 800;
+  color: var(--p-highlight);
+}
+
+body.theme-premium .wayfind-copy .wayfind-detail {
+  font-size: clamp(0.78rem, 1.35vw, 0.98rem);
+  color: #e8eef6;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+body.theme-premium .footer {
+  background: rgba(6, 20, 38, 0.95);
+  border-top: 1px solid rgba(0, 174, 239, 0.18);
+  color: var(--p-muted);
+}
+
+body.theme-premium .theme-link {
+  color: var(--p-accent);
+}
+
+body.theme-premium .admin-link {
+  color: var(--p-highlight);
+}
+
+@media (max-height: 800px) {
+  body.theme-premium .station-board-panel { max-height: min(30%, 11rem); }
+  body.theme-premium .pin-row { height: clamp(2.8rem, 6vh, 3.6rem); }
+  body.theme-premium .you-pin .traveler { height: clamp(2.2rem, 5vh, 2.9rem); }
+}
+
+@media (max-height: 600px) {
+  body.theme-premium .station-board-panel { max-height: min(26%, 8.5rem); }
+  body.theme-premium .pin-row { height: clamp(2.4rem, 5.5vh, 3.1rem); }
+  body.theme-premium .you-pin .traveler { height: clamp(2rem, 4.5vh, 2.5rem); }
+  body.theme-premium .wayfind-panel { padding: 0.4rem 0.65rem; }
+}
+
+/* Show more board rows on premium (override short-viewport hide). */
+body.theme-premium[data-vh="short"] .station-board-panel { max-height: min(30%, 11rem); }
+body.theme-premium[data-vh="short"] .station-board tbody tr:nth-child(n+4) { display: table-row; }
+body.theme-premium[data-vh="short"] .station-board tbody tr:nth-child(n+7) { display: none; }
+body.theme-premium[data-vh="tiny"] .station-board-panel { display: block; max-height: min(24%, 7.5rem); }
+body.theme-premium[data-vh="tiny"] .station-board tbody tr:nth-child(n+5) { display: none; }

@@ -1,0 +1,271 @@
+/* NTES-style light coach chart. Loaded with the TV stylesheet. */
+
+html:has(body.theme-chart),
+body.theme-chart {
+  background: #eef0f5;
+  color: #1f2937;
+  overflow: auto;
+}
+
+body.theme-chart .header {
+  background: #f7f8fc;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+body.theme-chart .header h1 {
+  color: #111827;
+  letter-spacing: 0;
+  font-size: clamp(1.15rem, 2.4vw, 1.7rem);
+}
+
+body.theme-chart .subtitle { color: #6b7280; }
+body.theme-chart .clock { color: #1d4ed8; }
+body.theme-chart .clock-date { color: #6b7280; }
+body.theme-chart .lang { color: #1d4ed8; }
+
+body.theme-chart .board {
+  overflow: auto;
+  gap: 0.85rem;
+}
+
+body.theme-chart .station-board-panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  max-height: 32%;
+}
+
+body.theme-chart .panel-title {
+  color: #1d4ed8;
+  background: linear-gradient(90deg, rgba(29, 78, 216, 0.08), transparent);
+  border-bottom-color: #e5e7eb;
+}
+
+body.theme-chart .station-board th,
+body.theme-chart .station-board td {
+  border-bottom-color: #f3f4f6;
+  color: #111827;
+}
+
+body.theme-chart .station-board th { color: #6b7280; }
+body.theme-chart .station-board .pf { color: #1d4ed8; }
+body.theme-chart .station-board tr.is-focus {
+  background: linear-gradient(90deg, rgba(29, 78, 216, 0.12), rgba(29, 78, 216, 0.03));
+}
+body.theme-chart .station-board tr.is-focus td { color: #111827; }
+
+body.theme-chart .focus-panel {
+  background: #f7f8fc;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+body.theme-chart .rake-wrap {
+  min-height: 16rem;
+  overflow: visible;
+}
+
+body.theme-chart .rake-stage {
+  grid-template-rows: minmax(0, 0.85fr) auto minmax(0, 1.2fr);
+  overflow: visible;
+}
+
+body.theme-chart .focus-kicker { color: #1d4ed8; }
+body.theme-chart .focus-id { color: #111827; }
+body.theme-chart .focus-id strong { color: #1d4ed8; }
+body.theme-chart .focus-meta .pill {
+  background: #1d4ed8;
+  color: #fff;
+}
+body.theme-chart .focus-meta .eta {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+body.theme-chart .heading-banner {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+body.theme-chart .heading-banner .dest { color: #111827; }
+body.theme-chart .heading-banner .towards-label,
+body.theme-chart .heading-banner .motion { color: #1d4ed8; }
+
+body.theme-chart .divyangjan-banner {
+  justify-content: flex-start;
+  background: transparent;
+  border: none;
+  color: #1d4ed8;
+  padding: 0.15rem 0.2rem;
+  font-weight: 700;
+}
+
+body.theme-chart .divyangjan-banner.muted { color: #6b7280; }
+
+body.theme-chart .rake {
+  overflow: visible;
+  padding-top: 0.2rem;
+  gap: 0.35rem;
+}
+
+body.theme-chart .coach {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  gap: 0.2rem;
+}
+
+body.theme-chart .coach .num {
+  position: static;
+  background: #f97316;
+  color: #0b1220;
+  min-width: clamp(1rem, calc(62vw / var(--coach-count) / 5.5), 1.65rem);
+  height: clamp(1rem, calc(62vw / var(--coach-count) / 5.5), 1.65rem);
+  font-size: clamp(0.62rem, calc(62vw / var(--coach-count) / 7), 0.95rem);
+  font-weight: 800;
+  margin-bottom: 0.05rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+body.theme-chart .coach-art {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(100%, calc(92vw / var(--coach-count) * 1.1));
+}
+
+body.theme-chart .coach .code {
+  background: none;
+  color: #111827;
+  font-size: clamp(0.62rem, calc(88vw / var(--coach-count) / 7.2), 1.05rem);
+  font-weight: 800;
+  padding: 0;
+}
+
+body.theme-chart .coach .kind { display: none; }
+
+body.theme-chart .coach .divyang-badge {
+  top: 1.15rem;
+  right: 0;
+  filter: none;
+}
+
+body.theme-chart .coach.divyangjan,
+body.theme-chart .coach.pin-aligned,
+body.theme-chart .coach.divyangjan.pin-aligned {
+  box-shadow: none;
+  border: none;
+  background: transparent;
+}
+
+body.theme-chart .coach.pin-aligned .num {
+  color: #b45309;
+  font-weight: 800;
+}
+
+body.theme-chart .track {
+  height: 0.85rem;
+  margin-top: -0.35rem;
+  background: none;
+}
+
+body.theme-chart .track .ballast,
+body.theme-chart .track .sleepers,
+body.theme-chart .track .rail,
+body.theme-chart .track .rail-glow {
+  display: none;
+}
+
+body.theme-chart .track::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0.35rem;
+  border-top: 2px dotted #c4c9d4;
+}
+
+body.theme-chart .platform-coping { display: none; }
+
+body.theme-chart .platform-deck {
+  background: #f7f8fc;
+  border: none;
+  box-shadow: none;
+  min-height: 0;
+  overflow: visible;
+}
+
+body.theme-chart .platform-wayfind {
+  margin-top: 0.85rem;
+  overflow: visible;
+}
+
+body.theme-chart .platform-grain,
+body.theme-chart .yellow-line,
+body.theme-chart .bay-ticks { display: none; }
+
+body.theme-chart .amenity-strip {
+  margin-top: 0.15rem;
+}
+
+body.theme-chart .amenity-axis {
+  background: rgba(148, 163, 184, 0.35);
+}
+
+body.theme-chart .amenity-label {
+  color: #374151;
+}
+
+body.theme-chart .amenity-access-badge {
+  background: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+body.theme-chart .fob-bridge-art {
+  opacity: 0.75;
+}
+
+body.theme-chart .walk-cell { border-left-color: rgba(148, 163, 184, 0.25); }
+body.theme-chart .walk-cell .walk-dist { color: #111827; }
+body.theme-chart .walk-cell .walk-time { color: #1d4ed8; }
+/* Chart inherits frozen ±90° walk labels from style.css */
+
+body.theme-chart .amenity-strip.amenity-building {
+  margin-top: 0;
+  margin-bottom: 0.12rem;
+  height: clamp(2rem, 4vh, 2.6rem);
+}
+
+body.theme-chart .amenity-icon {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+}
+body.theme-chart .walk-cell.is-here .walk-dist { color: #b45309; }
+
+body.theme-chart .pin-cluster {
+  background: #111827;
+  border-color: #fbbf24;
+}
+body.theme-chart .pin-cluster .label { color: #fbbf24; }
+
+body.theme-chart .pin-note { color: #4b5563; }
+
+body.theme-chart .footer {
+  background: #f7f8fc;
+  border-top: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+body.theme-chart .admin-link,
+body.theme-chart .theme-link { color: #1d4ed8; }
+
+.theme-link {
+  color: #f97316;
+  text-decoration: none;
+  font-weight: 700;
+}

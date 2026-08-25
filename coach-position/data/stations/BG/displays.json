@@ -1,0 +1,30 @@
+{
+  "stationCode": "BG",
+  "stationName": "BHONGIR",
+  "bogieLengthMeters": 22.3,
+  "showBeforeMinutes": 10,
+  "hideAfterDepartMinutes": 0,
+  "lookAheadHours": 4,
+  "languages": [
+    "en",
+    "te",
+    "hi"
+  ],
+  "displays": [
+    {
+      "id": "entrance-main",
+      "name": "Main entrance TV",
+      "mode": "dual",
+      "platformsShown": [
+        "1",
+        "2"
+      ],
+      "youAreHere": {
+        "platform": "1",
+        "slotIndex": 7,
+        "metersFromEngineEnd": 167,
+        "facing": "engine_left"
+      }
+    }
+  ]
+}

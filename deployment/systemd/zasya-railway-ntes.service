@@ -1,0 +1,20 @@
+[Unit]
+Description=Zasya Railway NTES poller
+PartOf=zasya-railway.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=zasya-ntes
+Group=zasya
+WorkingDirectory=/opt/zasya/railway
+Environment=RAILWAY_APPLIANCE=1
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /opt/zasya/railway/edge/ntes/poller.js
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=zasya-railway.target

@@ -1,0 +1,230 @@
+{
+  "CHZ": {
+    "code": "CHZ",
+    "en": "CHARLAPALLI",
+    "te": "చర్లపల్లి",
+    "hi": "चर्लापल्ली",
+    "aliases": ["CHARLAPALLI", "CHARLAPALLE"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "SC": {
+    "code": "SC",
+    "en": "SECUNDERABAD JN",
+    "te": "సికింద్రాబాద్ జంక్షన్",
+    "hi": "सिकंदराबाद जंक्शन",
+    "aliases": ["SECUNDERABAD", "SECUNDERABAD JUNCTION", "SECUNDERABAD JN."],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "HYB": {
+    "code": "HYB",
+    "en": "HYDERABAD DECCAN",
+    "te": "హైదరాబాద్ డెక్కన్",
+    "hi": "हैदराबाद डेक्कन",
+    "aliases": ["HYDERABAD", "HYDERABAD DECCAN", "NAMPALLY"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "KCG": {
+    "code": "KCG",
+    "en": "KACHEGUDA",
+    "te": "కాచిగూడ",
+    "hi": "काचीगुडा",
+    "aliases": ["KACHEGUDA"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "BMT": {
+    "code": "BMT",
+    "en": "BEGUMPET",
+    "te": "బేగంపేట",
+    "hi": "बेगमपेट",
+    "aliases": ["BEGUMPET"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "LPI": {
+    "code": "LPI",
+    "en": "LINGAMPALLI",
+    "te": "లింగంపల్లి",
+    "hi": "लिंगमपल्ली",
+    "aliases": ["LINGAMPALLI", "LINGAMPALLY"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "MJF": {
+    "code": "MJF",
+    "en": "MALKAJGIRI",
+    "te": "మల్కాజ్‌గిరి",
+    "hi": "मल्काजगिरी",
+    "aliases": ["MALKAJGIRI"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "NLDA": {
+    "code": "NLDA",
+    "en": "NALGONDA",
+    "te": "నల్గొండ",
+    "hi": "नलगोंडा",
+    "aliases": ["NALGONDA"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "BG": {
+    "code": "BG",
+    "en": "BHONGIR",
+    "te": "భువనగిరి",
+    "hi": "भुवनगिरी",
+    "aliases": ["BHONGIR", "BHUVANAGIRI"],
+    "source": "SCR official signage",
+    "verifiedAt": "2026-08-12"
+  },
+  "BZA": {
+    "code": "BZA",
+    "en": "VIJAYAWADA JN",
+    "te": "విజయవాడ జంక్షన్",
+    "hi": "विजयवाड़ा जंक्शन",
+    "aliases": ["VIJAYAWADA", "VIJAYAWADA JN", "VIJAYAWADA JUNCTION", "BEZWADA"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "WL": {
+    "code": "WL",
+    "en": "WARANGAL",
+    "te": "వరంగల్",
+    "hi": "वरंगल",
+    "aliases": ["WARANGAL", "WARANGAL JN"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "KZJ": {
+    "code": "KZJ",
+    "en": "KAZIPET JN",
+    "te": "కాజీపేట జంక్షన్",
+    "hi": "काजीपेट जंक्शन",
+    "aliases": ["KAZIPET", "KAZIPET JN", "KAZIPET JUNCTION"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "SKZR": {
+    "code": "SKZR",
+    "en": "SIRPUR KAGHAZNAGAR",
+    "te": "సిర్పూర్ కాగజ్‌నగర్",
+    "hi": "सिरपुर कागजनगर",
+    "aliases": ["SIRPUR KAGHAZNAGAR", "SIRPUR KAGAZNAGAR"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "MAS": {
+    "code": "MAS",
+    "en": "MGR CHENNAI CENTRAL",
+    "te": "ఎంజీఆర్ చెన్నై సెంట్రల్",
+    "hi": "एमजीआर चेन्नई सेंट्रल",
+    "aliases": [
+      "CHENNAI CENTRAL",
+      "MADRAS CENTRAL",
+      "PURATCHI THALAIVAR DR. MGR CTRL",
+      "PURATCHI THALAIVAR",
+      "MGR CHENNAI CENTRAL",
+      "CHENNAI"
+    ],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "HWH": {
+    "code": "HWH",
+    "en": "HOWRAH JN",
+    "te": "హౌరా జంక్షన్",
+    "hi": "हावड़ा जंक्शन",
+    "aliases": ["HOWRAH", "HOWRAH JN", "HOWRAH JUNCTION"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "SBC": {
+    "code": "SBC",
+    "en": "KSR BENGALURU",
+    "te": "కెఎస్ఆర్ బెంగళూరు",
+    "hi": "केएसआर बेंगलुरु",
+    "aliases": ["BANGALORE", "BENGALURU", "KSR BENGALURU CITY", "KSR BENGALURU"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "NED": {
+    "code": "NED",
+    "en": "NANDED",
+    "te": "నాందేడ్",
+    "hi": "नांदेड़",
+    "aliases": ["NANDED", "HAZUR SAHIB NANDED"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "GNT": {
+    "code": "GNT",
+    "en": "GUNTUR JN",
+    "te": "గుంటూరు జంక్షన్",
+    "hi": "गुंटूर जंक्शन",
+    "aliases": ["GUNTUR", "GUNTUR JN"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "TPTY": {
+    "code": "TPTY",
+    "en": "TIRUPATI",
+    "te": "తిరుపతి",
+    "hi": "तिरुपति",
+    "aliases": ["TIRUPATI", "TIRUPATHI"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "SNSI": {
+    "code": "SNSI",
+    "en": "SAINAGAR SHIRDI",
+    "te": "సాయినగర్ షిర్డీ",
+    "hi": "साईनगर शिरडी",
+    "aliases": ["SAINAGAR SHIRDI", "SHIRDI"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "BIDR": {
+    "code": "BIDR",
+    "en": "BIDAR",
+    "te": "బీదర్",
+    "hi": "बीदर",
+    "aliases": ["BIDAR"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "SHM": {
+    "code": "SHM",
+    "en": "SHALIMAR",
+    "te": "షాలిమార్",
+    "hi": "शालिमार",
+    "aliases": ["SHALIMAR", "SHALIMAR KOLKATA"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "BDCR": {
+    "code": "BDCR",
+    "en": "BHADRACHALAM RD",
+    "te": "భద్రాచలం రోడ్",
+    "hi": "भद्राचलम रोड",
+    "aliases": [
+      "BHADRACHALAM RD",
+      "BHADRACHALAM ROAD",
+      "BHADRACHALAM",
+      "BHADRACHALAM R"
+    ],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  },
+  "ADB": {
+    "code": "ADB",
+    "en": "ADILABAD",
+    "te": "ఆదిలాబాద్",
+    "hi": "आदिलाबाद",
+    "aliases": ["ADILABAD"],
+    "source": "SCR / NTES demo master",
+    "verifiedAt": "2026-08-12"
+  }
+}

@@ -1,0 +1,72 @@
+[
+  {
+    "trainNo": "12714",
+    "trainName": "SATAVAHANA SF",
+    "from": "SECUNDERABAD JN",
+    "to": "VIJAYAWADA JN",
+    "platform": "1",
+    "scheduledArrival": null,
+    "scheduledDeparture": "17:40",
+    "expectedArrival": null,
+    "expectedDeparture": "17:40",
+    "status": "On Time",
+    "runningState": "scheduled",
+    "delay": 0
+  },
+  {
+    "trainNo": "17012",
+    "trainName": "SKZR-BIDR EXP",
+    "from": "SIRPUR KAGHAZNAGAR",
+    "to": "BIDAR",
+    "platform": "2",
+    "scheduledArrival": "17:55",
+    "scheduledDeparture": "17:57",
+    "expectedArrival": "17:55",
+    "expectedDeparture": "17:57",
+    "status": "On Time",
+    "runningState": "scheduled",
+    "delay": 0
+  },
+  {
+    "trainNo": "17201",
+    "trainName": "GOLCONDA EXP",
+    "from": "GUNTUR JN",
+    "to": "SECUNDERABAD JN",
+    "platform": "1",
+    "scheduledArrival": "18:10",
+    "scheduledDeparture": "18:12",
+    "expectedArrival": "18:10",
+    "expectedDeparture": "18:12",
+    "status": "On Time",
+    "runningState": "scheduled",
+    "delay": 0
+  },
+  {
+    "trainNo": "12760",
+    "trainName": "CHARMINAR EXP",
+    "from": "HYDERABAD DECAN",
+    "to": "CHENNAI CENTRAL",
+    "platform": "3",
+    "scheduledArrival": "18:25",
+    "scheduledDeparture": "18:30",
+    "expectedArrival": "18:35",
+    "expectedDeparture": "18:40",
+    "status": "Delayed",
+    "runningState": "scheduled",
+    "delay": 10
+  },
+  {
+    "trainNo": "07091",
+    "trainName": "BG-KZJ MEMU",
+    "from": "BHONGIR",
+    "to": "KAZIPET JN",
+    "platform": "2",
+    "scheduledArrival": null,
+    "scheduledDeparture": "18:50",
+    "expectedArrival": null,
+    "expectedDeparture": "18:50",
+    "status": "On Time",
+    "runningState": "scheduled",
+    "delay": 0
+  }
+]

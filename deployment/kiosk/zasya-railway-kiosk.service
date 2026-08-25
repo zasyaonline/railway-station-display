@@ -1,0 +1,18 @@
+[Unit]
+Description=Zasya Railway Chromium kiosk
+PartOf=zasya-railway.target
+After=nginx.service zasya-railway-platform.service zasya-railway-display.service
+Wants=nginx.service zasya-railway-display.service
+
+[Service]
+Type=simple
+User=zasya-kiosk
+Group=zasya
+Environment=DISPLAY=:0
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 30); do [ -e /tmp/.X11-unix/X0 ] && exit 0; sleep 1; done; exit 1'
+ExecStart=/bin/bash -c '/usr/local/sbin/chromium-kiosk "$(cat /etc/zasya/railway/kiosk-url 2>/dev/null || echo http://127.0.0.1/platform/)"'
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=zasya-railway.target

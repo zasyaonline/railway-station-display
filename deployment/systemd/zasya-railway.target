@@ -1,0 +1,7 @@
+[Unit]
+Description=Zasya Railway station stack
+Wants=network-online.target
+After=network-online.target
+
+[Install]
+WantedBy=multi-user.target

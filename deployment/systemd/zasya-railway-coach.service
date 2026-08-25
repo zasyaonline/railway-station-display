@@ -1,0 +1,21 @@
+[Unit]
+Description=Zasya Railway Coach Position display
+PartOf=zasya-railway.target
+After=zasya-railway-ntes.service
+Wants=zasya-railway-ntes.service
+
+[Service]
+Type=simple
+User=zasya-display
+Group=zasya
+WorkingDirectory=/opt/zasya/railway
+Environment=RAILWAY_APPLIANCE=1
+Environment=PORT=3001
+Environment=BIND_HOST=127.0.0.1
+ExecStart=/usr/bin/node /opt/zasya/railway/coach-position/server.js
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=zasya-railway.target

@@ -1,0 +1,12 @@
+{
+  "licenceId": "ZSY-BG-SAMPLE-2026",
+  "stationCode": "BG",
+  "products": [
+    "platform",
+    "coach"
+  ],
+  "validFrom": "2026-08-25",
+  "validUntil": "2027-08-25",
+  "installationId": "",
+  "signature": "JPe8AzTEdawI1rf6L+xUxjx0mgWNajNfKfVSlwfmo4HsI5QVQ6PDj2jDTH2512kSoY0s9Jl3KhgsLxnb+W6yBg=="
+}

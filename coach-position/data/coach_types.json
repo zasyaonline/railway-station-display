@@ -1,0 +1,225 @@
+{
+  "version": 1,
+  "bogieLengthMetersDefault": 25,
+  "fallbackTypeId": "unknown",
+  "types": {
+    "engine": {
+      "id": "engine",
+      "label": "Engine",
+      "labelTe": "ఇంజిన్",
+      "labelHi": "इंजन",
+      "asset": "engine.png",
+      "color": "#1e293b"
+    },
+    "slr": {
+      "id": "slr",
+      "label": "SLR",
+      "labelTe": "ఎస్ఎల్ఆర్",
+      "labelHi": "एसएलआर",
+      "asset": "slr.png",
+      "color": "#78716c"
+    },
+    "parcel": {
+      "id": "parcel",
+      "label": "Parcel",
+      "labelTe": "పార్సెల్",
+      "labelHi": "पार्सल",
+      "asset": "parcel.png",
+      "color": "#a8a29e"
+    },
+    "pantry": {
+      "id": "pantry",
+      "label": "Pantry",
+      "labelTe": "ప్యాంట్రీ",
+      "labelHi": "पेंट्री",
+      "asset": "pantry.png",
+      "color": "#ea580c"
+    },
+    "ac1": {
+      "id": "ac1",
+      "label": "AC 1A",
+      "labelTe": "ఏసి 1A",
+      "labelHi": "एसी 1A",
+      "asset": "ac1.png",
+      "color": "#1d4ed8"
+    },
+    "ac2": {
+      "id": "ac2",
+      "label": "AC 2A",
+      "labelTe": "ఏసి 2A",
+      "labelHi": "एसी 2A",
+      "asset": "ac2.png",
+      "color": "#2563eb"
+    },
+    "ac3": {
+      "id": "ac3",
+      "label": "AC 3A",
+      "labelTe": "ఏసి 3A",
+      "labelHi": "एसी 3A",
+      "asset": "ac3.png",
+      "color": "#3b82f6"
+    },
+    "chair": {
+      "id": "chair",
+      "label": "Chair",
+      "labelTe": "చైర్",
+      "labelHi": "चेयर",
+      "asset": "chair.png",
+      "color": "#0ea5e9"
+    },
+    "sleeper": {
+      "id": "sleeper",
+      "label": "Sleeper",
+      "labelTe": "స్లీపర్",
+      "labelHi": "स्लीपर",
+      "asset": "sleeper.png",
+      "color": "#16a34a"
+    },
+    "general": {
+      "id": "general",
+      "label": "General",
+      "labelTe": "జనరల్",
+      "labelHi": "जनरल",
+      "asset": "general.png",
+      "color": "#64748b"
+    },
+    "eog": {
+      "id": "eog",
+      "label": "EOG",
+      "labelTe": "EOG",
+      "labelHi": "EOG",
+      "asset": "eog.png",
+      "color": "#57534e"
+    },
+    "unknown": {
+      "id": "unknown",
+      "label": "Coach",
+      "labelTe": "కోచ్",
+      "labelHi": "कोच",
+      "asset": "unknown.png",
+      "color": "#334155"
+    }
+  },
+  "codeRules": [
+    {
+      "match": "ENG",
+      "typeId": "engine",
+      "note": "Locomotive"
+    },
+    {
+      "match": "LOCO",
+      "typeId": "engine"
+    },
+    {
+      "match": "EOG",
+      "typeId": "eog"
+    },
+    {
+      "match": "HOG",
+      "typeId": "eog"
+    },
+    {
+      "match": "PC",
+      "typeId": "pantry"
+    },
+    {
+      "match": "SLR",
+      "typeId": "slr"
+    },
+    {
+      "match": "SLRD",
+      "typeId": "slr"
+    },
+    {
+      "match": "HCPV",
+      "typeId": "parcel"
+    },
+    {
+      "match": "VP",
+      "typeId": "parcel"
+    },
+    {
+      "match": "re:^(HA?|H)\\d+$",
+      "typeId": "ac1",
+      "note": "1A / HA"
+    },
+    {
+      "match": "1A",
+      "typeId": "ac1"
+    },
+    {
+      "match": "re:^A\\d+$",
+      "typeId": "ac2",
+      "note": "2A"
+    },
+    {
+      "match": "2A",
+      "typeId": "ac2"
+    },
+    {
+      "match": "re:^B\\d+$",
+      "typeId": "ac3",
+      "note": "3A"
+    },
+    {
+      "match": "3A",
+      "typeId": "ac3"
+    },
+    {
+      "match": "LPR",
+      "typeId": "parcel",
+      "note": "Luggage / parcel"
+    },
+    {
+      "match": "re:^BE\\d*$",
+      "typeId": "ac3",
+      "note": "3A economy / BE"
+    },
+    {
+      "match": "re:^M\\d+$",
+      "typeId": "ac3",
+      "note": "3E"
+    },
+    {
+      "match": "3E",
+      "typeId": "ac3"
+    },
+    {
+      "match": "re:^C\\d+$",
+      "typeId": "chair"
+    },
+    {
+      "match": "CC",
+      "typeId": "chair"
+    },
+    {
+      "match": "EC",
+      "typeId": "chair"
+    },
+    {
+      "match": "2S",
+      "typeId": "chair"
+    },
+    {
+      "match": "re:^D\\d+$",
+      "typeId": "chair",
+      "note": "2S day coaches"
+    },
+    {
+      "match": "re:^S\\d+$",
+      "typeId": "sleeper"
+    },
+    {
+      "match": "SL",
+      "typeId": "sleeper"
+    },
+    {
+      "match": "GS",
+      "typeId": "general"
+    },
+    {
+      "match": "GEN",
+      "typeId": "general"
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "code": "BG",
+  "name": "Bhuvanagiri",
+  "screenAxis": {
+    "leftToward": [
+      "SECUNDERABAD JN",
+      "SECUNDERABAD",
+      "SC",
+      "CHARLAPALLI",
+      "CHZ",
+      "BIDAR",
+      "BIDR"
+    ],
+    "rightToward": [
+      "VIJAYAWADA JN",
+      "VIJAYAWADA",
+      "BZA",
+      "WARANGAL",
+      "WL",
+      "KAZIPET",
+      "KZJ",
+      "SIRPUR KAGHAZNAGAR",
+      "SKZR"
+    ],
+    "note": "UP = Secunderabad (screen left). DOWN = Kazipet / Vijayawada (screen right). Platform number comes from NTES each run; trains may switch PF when capacity requires."
+  },
+  "markerGrid": {
+    "spacingMeters": 22.3,
+    "secunderabadEnd": "left",
+    "kazipetEnd": "right"
+  },
+  "platforms": [
+    {
+      "id": "1",
+      "name": "Platform 1",
+      "islandWith": null,
+      "lengthMeters": 620,
+      "secunderabadMarker": 1,
+      "kazipetMarker": 26,
+      "engineStopNote": "Markers 1→26 left to right (Secunderabad to Kazipet). Platform from NTES live board."
+    },
+    {
+      "id": "2",
+      "name": "Platform 2",
+      "islandWith": "3",
+      "lengthMeters": 576,
+      "secunderabadMarker": 25,
+      "kazipetMarker": 1,
+      "engineStopNote": "Markers 25→1 left to right (opposite numbering to PF1). Island with PF3; one FOB serves both faces."
+    },
+    {
+      "id": "3",
+      "name": "Platform 3",
+      "islandWith": "2",
+      "lengthMeters": 576,
+      "secunderabadMarker": 25,
+      "kazipetMarker": 1,
+      "engineStopNote": "Opposite face of PF2 island. Same foot over bridge as PF2."
+    }
+  ],
+  "amenities": [
+    {
+      "id": "toilet",
+      "label": "Toilet",
+      "platform": "1",
+      "markerFrom": 5,
+      "markerTo": 6,
+      "category": "passenger"
+    },
+    {
+      "id": "toilet-divyang",
+      "label": "Toilet (Divyang)",
+      "platform": "1",
+      "markerFrom": 5,
+      "markerTo": 6,
+      "category": "accessibility"
+    },
+    {
+      "id": "upper-class-waiting",
+      "label": "Upper Class Waiting Room",
+      "platform": "1",
+      "markerFrom": 7,
+      "markerTo": 8,
+      "category": "waiting"
+    },
+    {
+      "id": "station-master",
+      "label": "Station Master Office",
+      "platform": "1",
+      "markerFrom": 9,
+      "markerTo": 11,
+      "category": "admin"
+    },
+    {
+      "id": "drinking-water",
+      "label": "Drinking Water",
+      "platform": "1",
+      "markerFrom": 10,
+      "markerTo": 12,
+      "category": "utility"
+    },
+    {
+      "id": "display-tv",
+      "label": "Coach Position Display",
+      "platform": "1",
+      "markerFrom": 8,
+      "markerTo": 9,
+      "category": "display",
+      "displayId": "entrance-main"
+    },
+    {
+      "id": "fob-pf1",
+      "label": "Foot Over Bridge",
+      "platform": "1",
+      "markerFrom": 14,
+      "markerTo": 15,
+      "walkMetersFromDisplayPin": 178,
+      "category": "circulation",
+      "linksTo": "fob-pf2",
+      "linksToPlatforms": ["2", "3"]
+    },
+    {
+      "id": "fob-pf2",
+      "label": "Foot Over Bridge",
+      "platform": "2",
+      "markerFrom": 12,
+      "markerTo": 13,
+      "category": "circulation",
+      "linksTo": "fob-pf1"
+    },
+    {
+      "id": "toilet-pf2",
+      "label": "Toilet",
+      "platform": "2",
+      "markerFrom": 7,
+      "markerTo": 8,
+      "category": "passenger"
+    }
+  ],
+  "notes": "Bhuvanagiri (BG) Platform 1, 2 & 3 layout from site survey (Aug 2026). PF2 and PF3 are island faces; single FOB from PF1 at 178 m walk. Station also known as Bhongir."
+}

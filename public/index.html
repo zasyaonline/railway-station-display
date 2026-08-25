@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Railway Station — Passenger Display</title>
+  <link rel="icon" href="img/favicon.png" type="image/png" sizes="64x64">
+  <link rel="icon" href="img/ir-logo.png" type="image/png" sizes="512x512">
+  <link rel="apple-touch-icon" href="img/ir-logo.png">
+  <link rel="stylesheet" href="css/style.css?v=20260812f">
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <img src="img/ir-logo.png" alt="Indian Railways" class="logo">
+      <h1 id="stationName">RAILWAY STATION</h1>
+    </div>
+    <div class="header-right">
+      <div class="clock" id="clock">--:--:--</div>
+      <div class="clock-date" id="clockDate"></div>
+    </div>
+  </header>
+
+  <main class="board">
+    <table class="train-table">
+      <thead>
+        <tr>
+          <th data-i18n="trainNo">Train No</th>
+          <th data-i18n="trainName">Train Name</th>
+          <th data-i18n="from">From</th>
+          <th data-i18n="to">To</th>
+          <th data-i18n="arrival">Arrival</th>
+          <th data-i18n="departure">Departure</th>
+          <th data-i18n="pf">PF</th>
+          <th data-i18n="status">Status</th>
+        </tr>
+      </thead>
+      <tbody id="trainBody">
+        <tr class="loading-row">
+          <td colspan="8" data-i18n="loading">Loading train information…</td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+
+  <footer class="footer">
+    <span><span data-i18n="lastUpdated">Last Updated</span>: <strong id="lastUpdated">—</strong></span>
+    <span><span data-i18n="autoRefresh">Auto Refresh Every</span> <strong id="refreshInterval">30</strong> <span data-i18n="seconds">Seconds</span></span>
+    <span class="footer-station"><span data-i18n="stationCode">Station Code</span>: <strong id="stationCode">—</strong></span>
+    <span id="dataSource"><span data-i18n="source">Source</span>: <strong data-i18n="sourceNtes">NTES Live Station</strong></span>
+    <span id="pageIndicator" class="page-indicator" hidden></span>
+    <span id="langIndicator" class="lang-indicator">EN</span>
+    <span class="refresh-status live" id="refreshStatus">● <span data-i18n="live">LIVE</span></span>
+    <span class="refresh-controls">
+      <button type="button" id="btnStart" class="btn-refresh btn-start" data-i18n-title="startTitle">▶ <span data-i18n="start">Start</span></button>
+      <button type="button" id="btnStop" class="btn-refresh btn-stop" data-i18n-title="stopTitle">■ <span data-i18n="stop">Stop</span></button>
+    </span>
+  </footer>
+
+  <script src="config.js?v=20260812f"></script>
+  <script src="js/i18n.js?v=20260812f"></script>
+  <script src="js/app.js?v=20260812f"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDS Admin — Sessions</title>
+  <link rel="icon" href="/img/favicon.png" type="image/png" sizes="64x64">
+  <link rel="icon" href="/img/ir-logo.png" type="image/png">
+  <link rel="stylesheet" href="/css/style.css?v=20260812b">
+  <link rel="stylesheet" href="/css/admin.css?v=20260812b">
+</head>
+<body class="admin-body">
+  <header class="header admin-header">
+    <div class="header-left">
+      <img src="/img/ir-logo.png" alt="Indian Railways" class="logo">
+      <h1>PDS Admin</h1>
+    </div>
+    <div class="header-right">
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <section class="admin-gate" id="gate">
+      <label for="adminKey">Admin key</label>
+      <div class="gate-row">
+        <input id="adminKey" type="password" autocomplete="current-password" placeholder="Enter admin key">
+        <button type="button" id="btnUnlock" class="btn-refresh btn-start">Open</button>
+      </div>
+      <p class="gate-hint">Default key is <code>chz-ops</code> unless changed in AWS.</p>
+      <p class="gate-error" id="gateError" hidden></p>
+    </section>
+
+    <section class="admin-panel" id="panel" hidden>
+      <div class="admin-summary">
+        <div class="stat">
+          <span class="stat-label">Active sessions</span>
+          <span class="stat-value" id="activeCount">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Live data</span>
+          <span class="stat-value" id="refreshState">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Station</span>
+          <span class="stat-value station-stat" id="currentStation">—</span>
+        </div>
+        <div class="admin-actions">
+          <button type="button" id="btnRefreshList" class="btn-refresh btn-start">Refresh list</button>
+          <button type="button" id="btnStopAll" class="btn-refresh btn-stop">Stop all sessions</button>
+          <button type="button" id="btnServiceStart" class="btn-refresh btn-start">Start service</button>
+          <button type="button" id="btnServiceStop" class="btn-refresh btn-stop">Stop service</button>
+        </div>
+      </div>
+
+      <section class="station-card">
+        <h2>Display station</h2>
+        <p class="station-help">
+          Enter an NTES station code. Apply validates the code with NTES and sets the English name automatically.
+          Telugu/Hindi titles come from the curated station master when available.
+        </p>
+        <div class="station-row">
+          <label for="stationPreset">Preset</label>
+          <select id="stationPreset"></select>
+        </div>
+        <div class="station-row station-custom">
+          <label for="stationCodeInput">Code</label>
+          <input id="stationCodeInput" type="text" maxlength="6" placeholder="e.g. SC" autocomplete="off" spellcheck="false">
+          <label for="stationNameInput">English (NTES)</label>
+          <input id="stationNameInput" type="text" maxlength="80" placeholder="Resolved on Apply" autocomplete="off" readonly>
+          <button type="button" id="btnApplyStation" class="btn-refresh btn-start">Apply station</button>
+        </div>
+        <p class="station-resolved" id="stationResolved" hidden></p>
+        <p class="station-status" id="stationStatus" hidden></p>
+      </section>
+
+      <section class="station-card platform-card">
+        <h2>Platform overrides</h2>
+        <p class="station-help">
+          Last-minute PF changes for trains on the current board. Overrides apply immediately on the next display poll.
+        </p>
+        <div class="platform-actions">
+          <button type="button" id="btnRefreshPlatforms" class="btn-refresh btn-start">Refresh platforms</button>
+          <button type="button" id="btnClearAllPlatforms" class="btn-refresh btn-stop">Clear all overrides</button>
+        </div>
+        <table class="train-table admin-table platform-table">
+          <thead>
+            <tr>
+              <th>Train</th>
+              <th>Name</th>
+              <th>NTES PF</th>
+              <th>Override</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="platformBody">
+            <tr class="no-trains"><td colspan="5">Unlock admin to load platforms</td></tr>
+          </tbody>
+        </table>
+        <p class="station-status" id="platformStatus" hidden></p>
+      </section>
+
+      <table class="train-table admin-table">
+        <thead>
+          <tr>
+            <th>Session</th>
+            <th>Started</th>
+            <th>Running</th>
+            <th>Last seen</th>
+            <th>Browser</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="sessionBody">
+          <tr class="no-trains"><td colspan="6">No active sessions</td></tr>
+        </tbody>
+      </table>
+
+      <p class="admin-note">
+        A session is a browser tab on the display. Idle tabs drop off after ~90s.
+        Stopping a session blanks that tab; Start/Stop service controls NTES live refresh for everyone.
+      </p>
+      <p><a class="admin-link" href="/">Open display →</a></p>
+    </section>
+  </main>
+
+  <script src="/config.js?v=20260812b"></script>
+  <script src="/js/admin.js?v=20260812b"></script>
+</body>
+</html>

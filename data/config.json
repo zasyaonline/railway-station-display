@@ -1,0 +1,15 @@
+{
+  "stationCode": "CHZ",
+  "stationName": "Charlapalli",
+  "refreshInterval": 30,
+  "refreshEnabled": true,
+  "platforms": 9,
+  "language": "English",
+  "displayCount": 12,
+  "pageSize": 6,
+  "pageIntervalSeconds": 10,
+  "languageRotateSeconds": 10,
+  "languages": ["en", "te", "hi"],
+  "hideDepartedAfterMinutes": 15,
+  "lookAheadHours": 4
+}

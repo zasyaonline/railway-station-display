@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none">
+  <!-- Left stair tower -->
+  <rect x="2" y="18" width="7" height="12" rx="1" fill="#475569" stroke="#94a3b8" stroke-width="0.8"/>
+  <path d="M3 28h5M3 25h5M3 22h5" stroke="#cbd5e1" stroke-width="0.9" stroke-linecap="round"/>
+  <!-- Right stair tower -->
+  <rect x="39" y="18" width="7" height="12" rx="1" fill="#475569" stroke="#94a3b8" stroke-width="0.8"/>
+  <path d="M40 28h5M40 25h5M40 22h5" stroke="#cbd5e1" stroke-width="0.9" stroke-linecap="round"/>
+  <!-- Bridge deck -->
+  <rect x="6" y="12" width="36" height="4" rx="1" fill="#64748b" stroke="#94a3b8" stroke-width="0.8"/>
+  <!-- Roof / shelter -->
+  <path d="M4 12 L24 4 L44 12 Z" fill="#1e293b" stroke="#fbbf24" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M8 12h32" stroke="#334155" stroke-width="1"/>
+  <!-- Railings -->
+  <path d="M8 12v6M40 12v6" stroke="#38bdf8" stroke-width="1.2"/>
+  <path d="M8 18h32" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Track hint below -->
+  <path d="M4 31h40" stroke="#334155" stroke-width="1.2" stroke-dasharray="2 2"/>
+</svg>

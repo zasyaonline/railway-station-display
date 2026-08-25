@@ -1,0 +1,332 @@
+#!/usr/bin/env bash
+# railway-setup — install/configure a Zasya Railway local appliance.
+# Safe to rerun. Secrets are not echoed.
+set -euo pipefail
+
+ROOT="${RAILWAY_APP_ROOT:-/opt/zasya/railway}"
+ETC="${ZASYA_RAILWAY_ETC:-/etc/zasya/railway}"
+DATA="${ZASYA_RAILWAY_ROOT:-/var/lib/zasya/railway}"
+LOG="${ZASYA_RAILWAY_LOG:-/var/log/zasya/railway}"
+
+NON_INTERACTIVE=0
+VALIDATE_ONLY=0
+STATION_CODE=""
+STATION_NAME=""
+LICENCE_SRC=""
+LICENCE_PUB=""
+ADMIN_PW_FILE=""
+GRACE=""
+KIOSK="http://127.0.0.1/platform/"
+NTES_ENDPOINT="https://enquiry.indianrail.gov.in/crisns/AppServAnd"
+NTES_USER_FILE=""
+NTES_PASS_FILE=""
+SOURCE_OVERRIDE=""
+
+failures=()
+note() { printf '%s\n' "$*"; }
+fail() { failures+=("$1"); note "FAIL: $1"; }
+
+usage() {
+  cat <<'EOF'
+Usage:
+  railway-setup [--validate-only]
+  railway-setup --non-interactive --station-code CODE --station-name NAME \
+    --licence FILE --licence-public-key FILE --admin-password-file FILE \
+    --grace-hours N [--kiosk-url URL] [--ntes-endpoint URL] \
+    [--ntes-user-file FILE] [--ntes-pass-file FILE] [--harden-ssh] \
+    [--source DIR]
+
+Application root is /opt/zasya/railway (RAILWAY_APP_ROOT). The git checkout
+is used as the install source only when this script lives under
+deployment/scripts/ or when --source / RAILWAY_SOURCE is set.
+EOF
+}
+
+read_secret() {
+  local prompt="$1"
+  local value=""
+  read -r -s -p "$prompt" value
+  echo >&2
+  printf '%s' "$value"
+}
+
+read_file_secret() {
+  local path="$1"
+  [[ -n "$path" && -f "$path" ]] || { printf ''; return 0; }
+  tr -d '\r\n' < "$path"
+}
+
+require_cmd() {
+  command -v "$1" >/dev/null 2>&1 || fail "missing command: $1"
+}
+
+resolve_source() {
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [[ -n "$SOURCE_OVERRIDE" ]]; then
+    SOURCE="$SOURCE_OVERRIDE"
+  elif [[ -n "${RAILWAY_SOURCE:-}" ]]; then
+    SOURCE="$RAILWAY_SOURCE"
+  elif [[ "$script_dir" == */deployment/scripts ]]; then
+    SOURCE="$(cd "$script_dir/../.." && pwd)"
+  else
+    SOURCE="$ROOT"
+  fi
+}
+
+validate_environment() {
+  note "==> Validating environment"
+  [[ "$(uname -s)" == "Linux" ]] || fail "OS is not Linux (Ubuntu Server expected)"
+  local mem
+  mem="$(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)"
+  if [[ "${mem:-0}" -lt 500000 ]]; then
+    fail "memory below 512MB"
+  fi
+  local disk
+  disk="$(df -Pk / | awk 'NR==2 {print $4}')"
+  if [[ "${disk:-0}" -lt 1000000 ]]; then
+    fail "disk below ~1GB free"
+  fi
+  require_cmd node
+  require_cmd nginx
+  require_cmd systemctl
+  node -e "process.exit(Number(process.versions.node.split('.')[0]) < 22 ? 1 : 0)" \
+    || fail "Node.js 22+ required"
+}
+
+create_users() {
+  note "==> Users and directories"
+  getent group zasya >/dev/null || groupadd --system zasya
+  id zasya-ntes >/dev/null 2>&1 || useradd --system --gid zasya --home "$DATA" --shell /usr/sbin/nologin zasya-ntes
+  id zasya-display >/dev/null 2>&1 || useradd --system --gid zasya --home "$DATA" --shell /usr/sbin/nologin zasya-display
+  id zasya-admin >/dev/null 2>&1 || useradd --system --gid zasya --home "$DATA" --shell /usr/sbin/nologin zasya-admin
+  id zasya-kiosk >/dev/null 2>&1 || useradd --system --gid zasya --home "$DATA" --shell /usr/sbin/nologin zasya-kiosk
+  id zasya-support >/dev/null 2>&1 || useradd --create-home --gid zasya --shell /bin/bash zasya-support
+  usermod -aG video zasya-kiosk 2>/dev/null || true
+  usermod -aG render zasya-kiosk 2>/dev/null || true
+
+  mkdir -p "$ETC" "$DATA"/{runtime,config,licence,platform,coach,backup,audit,chromium} "$LOG" "$ROOT"
+  chmod 0750 "$ETC"
+  chown root:zasya "$ETC"
+  chown -R zasya-ntes:zasya "$DATA/runtime"
+  chown zasya-display:zasya "$DATA/platform" "$DATA/coach"
+  chown zasya-admin:zasya "$DATA/audit" "$DATA/backup" "$DATA/licence"
+  chown zasya-kiosk:zasya "$DATA/chromium"
+  chown root:zasya "$LOG"
+  chmod 0770 "$LOG" "$DATA/runtime"
+}
+
+install_files() {
+  note "==> Installing application from $SOURCE -> $ROOT"
+  mkdir -p "$ROOT"
+  if [[ "$(cd "$SOURCE" && pwd)" != "$(cd "$ROOT" && pwd)" ]]; then
+    rsync -a --delete \
+      --exclude node_modules \
+      --exclude .git \
+      --exclude dist \
+      --exclude .zasya \
+      --exclude deployment/vm/.cache \
+      --exclude keys/licence-private.pem \
+      --exclude '**/licence-private.pem' \
+      "$SOURCE/" "$ROOT/"
+  fi
+  (cd "$ROOT" && npm install --omit=dev --silent)
+  (cd "$ROOT/coach-position" && npm install --omit=dev --silent)
+  install -m 0755 "$SOURCE/deployment/kiosk/chromium-kiosk.sh" /usr/local/sbin/chromium-kiosk
+  install -m 0755 "$SOURCE/deployment/kiosk/zasya-railway-display.sh" /usr/local/sbin/zasya-railway-display
+  install -m 0755 "$SOURCE/deployment/scripts/railway-setup" /usr/local/sbin/railway-setup
+  install -m 0755 "$SOURCE/deployment/scripts/acceptance.sh" /usr/local/sbin/railway-acceptance
+  install -m 0644 "$SOURCE/deployment/nginx/zasya-railway.conf" /etc/nginx/sites-available/zasya-railway
+  ln -sfn /etc/nginx/sites-available/zasya-railway /etc/nginx/sites-enabled/zasya-railway
+  rm -f /etc/nginx/sites-enabled/default
+  cp "$SOURCE/deployment/systemd/"*.service /etc/systemd/system/
+  cp "$SOURCE/deployment/systemd/zasya-railway.target" /etc/systemd/system/
+  cp "$SOURCE/deployment/kiosk/zasya-railway-kiosk.service" /etc/systemd/system/
+  cp "$SOURCE/deployment/kiosk/zasya-railway-display.service" /etc/systemd/system/
+  cp "$SOURCE/deployment/ubuntu/logrotate-zasya-railway" /etc/logrotate.d/zasya-railway
+  systemctl daemon-reload
+}
+
+write_config() {
+  note "==> Station configuration"
+  local station_code station_name licence_src ntes_endpoint ntes_user ntes_pass grace kiosk admin_pass admin_pass2 licence_pub
+
+  if [[ "$NON_INTERACTIVE" == "1" ]]; then
+    station_code="$STATION_CODE"
+    station_name="$STATION_NAME"
+    licence_src="$LICENCE_SRC"
+    licence_pub="$LICENCE_PUB"
+    ntes_endpoint="$NTES_ENDPOINT"
+    grace="$GRACE"
+    kiosk="$KIOSK"
+    ntes_user="$(read_file_secret "$NTES_USER_FILE")"
+    ntes_pass="$(read_file_secret "$NTES_PASS_FILE")"
+    admin_pass="$(read_file_secret "$ADMIN_PW_FILE")"
+    if [[ -z "$station_code" || -z "$station_name" || -z "$licence_src" || -z "$licence_pub" || -z "$grace" || -z "$admin_pass" ]]; then
+      fail "non-interactive setup requires --station-code --station-name --licence --licence-public-key --admin-password-file --grace-hours"
+      return
+    fi
+  else
+    read -r -p "Station code: " station_code
+    read -r -p "Station name: " station_name
+    read -r -p "Licence JSON path: " licence_src
+    read -r -p "Licence public key path [$ETC/licence-public.pem]: " licence_pub
+    licence_pub="${licence_pub:-$ETC/licence-public.pem}"
+    read -r -p "NTES endpoint [$NTES_ENDPOINT]: " ntes_endpoint
+    ntes_endpoint="${ntes_endpoint:-$NTES_ENDPOINT}"
+    ntes_user="$(read_secret "NTES username (blank if unused): ")"
+    ntes_pass="$(read_secret "NTES password (blank if unused): ")"
+    read -r -p "Licence grace period hours (required, operator-set): " grace
+    read -r -p "Kiosk URL [$KIOSK]: " kiosk
+    kiosk="${kiosk:-$KIOSK}"
+    admin_pass="$(read_secret "Admin password: ")"
+    admin_pass2="$(read_secret "Confirm admin password: ")"
+    if [[ "$admin_pass" != "$admin_pass2" || -z "$admin_pass" ]]; then
+      fail "admin passwords did not match"
+      return
+    fi
+  fi
+
+  umask 077
+  ZASYA_RAILWAY_ETC="$ETC" node "$ROOT/deployment/scripts/write-station-files.js" \
+    --station-code "$station_code" \
+    --station-name "$station_name" \
+    --ntes-endpoint "$ntes_endpoint" \
+    --ntes-user "$ntes_user" \
+    --ntes-pass "$ntes_pass" \
+    --grace "$grace" \
+    --kiosk "$kiosk"
+  chmod 0640 "$ETC/config.json" "$ETC/ntes.json"
+  chown root:zasya "$ETC/config.json"
+  chown root:zasya-ntes "$ETC/ntes.json"
+
+  if [[ -n "$licence_src" && -f "$licence_src" ]]; then
+    cp "$licence_src" "$ETC/licence.json"
+    chmod 0640 "$ETC/licence.json"
+    chown root:zasya "$ETC/licence.json"
+  else
+    fail "licence file missing"
+  fi
+
+  if [[ -n "$licence_pub" && -f "$licence_pub" ]]; then
+    cp "$licence_pub" "$ETC/licence-public.pem"
+  elif [[ -f "$SOURCE/keys/licence-public.pem" ]]; then
+    cp "$SOURCE/keys/licence-public.pem" "$ETC/licence-public.pem"
+  elif [[ -f "$ETC/licence-public.pem" ]]; then
+    true
+  else
+    fail "licence public key missing ($ETC/licence-public.pem)"
+  fi
+  if [[ -f "$ETC/licence-public.pem" ]]; then
+    chmod 0644 "$ETC/licence-public.pem"
+    chown root:zasya "$ETC/licence-public.pem"
+  fi
+  if [[ -f "$ETC/licence-private.pem" || -f "$ROOT/keys/licence-private.pem" ]]; then
+    fail "licence private key must not be present on the appliance"
+  fi
+
+  ZASYA_RAILWAY_ETC="$ETC" ZASYA_RAILWAY_ROOT="$DATA" \
+    node -e "require(process.argv[1]).saveAdminSecret(process.argv[2])" "$ROOT/edge/admin/auth.js" "$admin_pass"
+  chmod 0640 "$ETC/admin.json"
+  chown root:zasya-admin "$ETC/admin.json"
+
+  printf '%s\n' "$kiosk" > "$ETC/kiosk-url"
+  chmod 0644 "$ETC/kiosk-url"
+}
+
+enable_services() {
+  note "==> Services"
+  export RAILWAY_ALLOW_SSH="${RAILWAY_ALLOW_SSH:-1}"
+  bash "$ROOT/deployment/ubuntu/firewall.sh" || fail "firewall"
+  bash "$ROOT/deployment/ubuntu/ssh.sh" || true
+  nginx -t || fail "nginx config"
+  systemctl enable nginx zasya-railway.target \
+    zasya-railway-ntes.service zasya-railway-platform.service \
+    zasya-railway-coach.service zasya-railway-admin.service \
+    zasya-railway-display.service zasya-railway-kiosk.service
+  systemctl restart nginx
+  systemctl start zasya-railway.target || fail "failed to start zasya-railway.target"
+  systemctl start zasya-railway-display.service || fail "display service not started"
+  systemctl start zasya-railway-kiosk.service || fail "kiosk service not started"
+  sleep 2
+  systemctl is-active zasya-railway-ntes.service >/dev/null || fail "ntes service not active"
+  systemctl is-active zasya-railway-platform.service >/dev/null || fail "platform service not active"
+  systemctl is-active zasya-railway-coach.service >/dev/null || fail "coach service not active"
+  systemctl is-active zasya-railway-admin.service >/dev/null || fail "admin service not active"
+  systemctl is-active zasya-railway-display.service >/dev/null || fail "display service not active"
+  systemctl is-active zasya-railway-kiosk.service >/dev/null || fail "kiosk service not active"
+}
+
+lan_ip() {
+  hostname -I 2>/dev/null | awk '{print $1}'
+}
+
+print_result() {
+  if [[ ${#failures[@]} -eq 0 ]]; then
+    local ip
+    ip="$(lan_ip)"
+    [[ -n "$ip" ]] || ip="127.0.0.1"
+    note ""
+    note "INSTALLATION READY"
+    note "Platform: http://${ip}/platform/"
+    note "Coach:    http://${ip}/coach/?station=BG&display=entrance-main"
+    note "Admin:    http://${ip}/admin/"
+    note "Health:   http://${ip}/health"
+    note "Verify:   http://${ip}/admin/verify.html"
+    exit 0
+  fi
+  note ""
+  note "INSTALLATION FAILED"
+  for f in "${failures[@]}"; do
+    note " - $f"
+  done
+  exit 1
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h) usage; exit 0 ;;
+      --non-interactive) NON_INTERACTIVE=1; shift ;;
+      --validate-only) VALIDATE_ONLY=1; shift ;;
+      --station-code) STATION_CODE="$2"; shift 2 ;;
+      --station-name) STATION_NAME="$2"; shift 2 ;;
+      --licence) LICENCE_SRC="$2"; shift 2 ;;
+      --licence-public-key) LICENCE_PUB="$2"; shift 2 ;;
+      --admin-password-file) ADMIN_PW_FILE="$2"; shift 2 ;;
+      --grace-hours) GRACE="$2"; shift 2 ;;
+      --kiosk-url) KIOSK="$2"; shift 2 ;;
+      --ntes-endpoint) NTES_ENDPOINT="$2"; shift 2 ;;
+      --ntes-user-file) NTES_USER_FILE="$2"; shift 2 ;;
+      --ntes-pass-file) NTES_PASS_FILE="$2"; shift 2 ;;
+      --harden-ssh) export RAILWAY_SSH_HARDEN=1; shift ;;
+      --source) SOURCE_OVERRIDE="$2"; shift 2 ;;
+      *)
+        echo "Unknown argument: $1" >&2
+        usage >&2
+        exit 2
+        ;;
+    esac
+  done
+}
+
+main() {
+  parse_args "$@"
+  resolve_source
+  if [[ "$VALIDATE_ONLY" == "1" ]]; then
+    validate_environment
+    print_result
+  fi
+  if [[ "$(id -u)" -ne 0 ]]; then
+    echo "Run as root: sudo railway-setup" >&2
+    exit 1
+  fi
+  validate_environment
+  create_users
+  install_files
+  write_config
+  enable_services
+  print_result
+}
+
+main "$@"

@@ -1,0 +1,14 @@
+node_modules/
+.zasya/
+*.log
+.DS_Store
+keys/licence-private.pem
+**/licence-private.pem
+data/live_status.json
+data/sessions.json
+coach-position/data/sessions.json
+.aws/
+credentials
+.venv-img/
+.venv/
+__pycache__/

@@ -1,0 +1,20 @@
+{
+  "name": "railway-station-display",
+  "version": "1.0.0",
+  "description": "Local Ubuntu appliance for Indian Railways passenger displays (platform, coach position, admin).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:ntes": "node edge/ntes/poller.js",
+    "start:admin": "node edge/admin/server.js",
+    "start:platform": "node server.js",
+    "start:coach": "node coach-position/server.js",
+    "test": "node --test --test-concurrency=1 tests/*/*.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

@@ -1,0 +1,61 @@
+.admin-body { overflow: auto; }
+.admin-main { padding: 1.5rem 2rem 3rem; max-width: 56rem; }
+.gate { max-width: 28rem; display: flex; flex-direction: column; gap: 0.6rem; margin-top: 2rem; }
+.row { display: flex; gap: 0.5rem; }
+.gate input, .form input, .form select {
+  background: #0d2240; border: 1px solid #334155; color: #e8edf5;
+  border-radius: 6px; padding: 0.55rem 0.7rem; font-size: 1rem;
+}
+.gate input { flex: 1; }
+.btn {
+  background: #f97316; color: #0a1628; border: none; border-radius: 6px;
+  font-weight: 700; padding: 0.55rem 1rem; cursor: pointer;
+}
+.hint { color: #64748b; font-size: 0.9rem; }
+.hint code { color: #f97316; }
+.error { color: #f87171; }
+.status { color: #4ade80; margin-top: 0.75rem; }
+.list { display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0 1.5rem; }
+.card {
+  background: #0d2240; border: 1px solid #1e3a5f; border-radius: 8px;
+  padding: 0.8rem 1rem; cursor: pointer;
+}
+.card:hover { border-color: #f97316; }
+.form { display: grid; gap: 0.65rem; }
+.station-form {
+  grid-template-columns: minmax(7rem, 10rem) auto 1fr auto;
+  align-items: end;
+}
+.station-form .btn { height: 2.55rem; }
+@media (max-width: 720px) {
+  .station-form { grid-template-columns: 1fr; }
+}
+[hidden] { display: none !important; }
+.form label { display: grid; gap: 0.25rem; color: #94a3b8; font-size: 0.85rem; }
+h2 { margin: 1rem 0 0.5rem; font-size: 1.15rem; }
+a { color: #f97316; }
+
+.session-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.5rem 0 0.75rem;
+}
+.session-actions { display: flex; gap: 0.5rem; }
+.btn-secondary { background: #334155; color: #e2e8f0; }
+.btn-stop { background: #ef4444; color: #fff; }
+.session-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+.session-table th,
+.session-table td {
+  text-align: left;
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid #1e3a5f;
+}
+.session-table th { color: #94a3b8; font-size: 0.78rem; text-transform: uppercase; }
+.session-table code { color: #fbbf24; }

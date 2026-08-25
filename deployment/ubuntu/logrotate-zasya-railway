@@ -1,0 +1,10 @@
+/var/log/zasya/railway/*.log {
+  weekly
+  rotate 8
+  size 5M
+  missingok
+  notifempty
+  compress
+  delaycompress
+  copytruncate
+}

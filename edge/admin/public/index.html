@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zasya Railway Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header>
+    <h1>Zasya Railway Admin</h1>
+    <p id="stationLine">Station —</p>
+  </header>
+  <main>
+    <section id="gate">
+      <label for="adminKey">Administrator password</label>
+      <div class="row">
+        <input id="adminKey" type="password" autocomplete="current-password">
+        <button type="button" id="btnUnlock">Open</button>
+      </div>
+      <p id="gateError" class="error" hidden></p>
+    </section>
+    <section id="panel" hidden>
+      <article>
+        <h2>Station</h2>
+        <p>Code: <strong id="stationCode">—</strong></p>
+        <p>Name: <strong id="stationName">—</strong></p>
+        <p>Licence: <strong id="licenceState">—</strong></p>
+      </article>
+      <article>
+        <h2>System</h2>
+        <pre id="systemStatus"></pre>
+      </article>
+      <article>
+        <h2>Platform overrides</h2>
+        <div id="platformList"></div>
+        <div class="row">
+          <input id="ovTrain" placeholder="Train no">
+          <input id="ovPlatform" placeholder="Platform">
+          <button type="button" id="btnOverride">Set</button>
+          <button type="button" id="btnClearAll">Clear all</button>
+        </div>
+      </article>
+      <article>
+        <h2>Coach display</h2>
+        <pre id="coachDisplays"></pre>
+      </article>
+      <p><a href="verify.html">Verification screen</a></p>
+    </section>
+  </main>
+  <script src="admin.js"></script>
+</body>
+</html>

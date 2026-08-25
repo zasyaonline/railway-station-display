@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coach Position Admin</title>
+  <link rel="icon" href="/img/favicon.png" type="image/png">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <header class="header">
+    <div class="header-left">
+      <img src="/img/ir-logo.png" alt="" class="logo">
+      <h1>Coach Position Admin</h1>
+    </div>
+  </header>
+  <main class="admin-main">
+    <section id="gate" class="gate">
+      <label>Admin key</label>
+      <div class="row">
+        <input id="adminKey" type="password" placeholder="coach-ops">
+        <button type="button" id="btnUnlock" class="btn">Open</button>
+      </div>
+      <p class="hint">Default key: <code>coach-ops</code></p>
+      <p id="gateError" class="error" hidden></p>
+    </section>
+
+    <section id="panel" hidden>
+      <h2>Station</h2>
+      <div class="form station-form">
+        <label>Station code <input id="fStationCode" placeholder="BG" maxlength="10" autocomplete="off" spellcheck="false"></label>
+        <button type="button" id="btnSearchStation" class="btn btn-secondary">Search</button>
+        <label>Station name <input id="fStationName" placeholder="Looked up from NTES" readonly></label>
+        <button type="button" id="btnSaveStation" class="btn">Save station</button>
+      </div>
+      <p class="hint">Enter the NTES code, click <strong>Search</strong> to fill the name, then <strong>Save station</strong> and <strong>Open display</strong>.</p>
+      <p id="stationHint" class="status" hidden></p>
+
+      <p style="margin-top:1.25rem">Displays for <strong id="stationCode">—</strong>
+        · <a id="previewLink" href="/?station=BG&display=entrance-main" target="_blank">Open display</a>
+      </p>
+      <div id="list" class="list"></div>
+
+      <h2>Display sessions</h2>
+      <div class="session-summary">
+        <span>Active: <strong id="activeCount">0</strong></span>
+        <div class="session-actions">
+          <button type="button" id="btnRefreshSessions" class="btn btn-secondary">Refresh list</button>
+          <button type="button" id="btnStopAll" class="btn btn-stop">Stop all</button>
+        </div>
+      </div>
+      <table class="session-table">
+        <thead>
+          <tr>
+            <th>Session</th>
+            <th>Started</th>
+            <th>Running</th>
+            <th>Last seen</th>
+            <th>Browser</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="sessionBody">
+          <tr><td colspan="6">No active sessions</td></tr>
+        </tbody>
+      </table>
+      <p class="hint">
+        A session is a browser tab on the display. Idle tabs drop off after ~90s.
+        Stopping a session blanks that TV. Session control needs the local API
+        (<code>localhost:3001</code>). CloudFront TVs read per-station JSON; Save uses the
+        cloud Coach API.
+      </p>
+
+      <h2>Edit / create display</h2>
+      <div class="form">
+        <label>id <input id="fId" placeholder="entrance-main"></label>
+        <label>name <input id="fName" placeholder="Main entrance TV"></label>
+        <label>mode
+          <select id="fMode"><option value="dual">dual</option><option value="single">single</option></select>
+        </label>
+        <label>platforms (comma) <input id="fPlatforms" placeholder="1,2"></label>
+        <label>youAreHere platform <input id="fPinPf" placeholder="1"></label>
+        <label>metres from engine <input id="fMetres" type="number" placeholder="75"></label>
+        <label>facing
+          <select id="fFacing">
+            <option value="engine_left">engine_left</option>
+            <option value="engine_right">engine_right</option>
+          </select>
+        </label>
+        <button type="button" id="btnSave" class="btn">Save display</button>
+      </div>
+      <p id="status" class="status" hidden></p>
+    </section>
+  </main>
+  <script src="/config.js"></script>
+  <script src="/js/admin.js?v=20260814f"></script>
+</body>
+</html>

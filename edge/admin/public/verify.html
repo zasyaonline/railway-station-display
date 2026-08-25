@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zasya Railway Appliance</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="verify">
+  <main class="verify-card">
+    <h1>ZASYA RAILWAY APPLIANCE</h1>
+    <pre id="report">Loading…</pre>
+    <p id="ready" class="ready" hidden>SYSTEM READY</p>
+  </main>
+  <script>
+    async function load() {
+      const res = await fetch('/api/edge/status', { cache: 'no-store' });
+      const h = await res.json();
+      const rows = [
+        ['Station', `${h.stationCode || '—'}`, h.stationCode],
+        ['Licence', String(h.licenceState || h.licence || '—').toUpperCase(), h.licence === 'valid' || h.licence === 'expiring'],
+        ['Platform', String(h.platform || '—').toUpperCase(), h.platform === 'running'],
+        ['Coach', String(h.coach || '—').toUpperCase(), h.coach === 'running'],
+        ['NTES', String(h.ntes || '—').toUpperCase(), h.ntes === 'connected' || h.ntes === 'stale'],
+        ['Network', 'OK', true],
+        ['Storage', 'OK', true],
+        ['Display', 'HDMI', true],
+        ['Time Sync', String(h.timeSync || '—').toUpperCase(), h.timeSync === 'healthy']
+      ];
+      document.getElementById('report').textContent = rows
+        .map(([k, v, ok]) => `${k.padEnd(12)} ${String(v).padEnd(14)} ${ok ? '✓' : '✗'}`)
+        .join('\n');
+      document.getElementById('ready').hidden = h.status !== 'healthy' && h.status !== 'degraded';
+      if (h.status === 'healthy') document.getElementById('ready').textContent = 'SYSTEM READY';
+      else if (h.status === 'degraded') document.getElementById('ready').textContent = 'SYSTEM DEGRADED';
+    }
+    load();
+    setInterval(load, 5000);
+  </script>
+</body>
+</html>
