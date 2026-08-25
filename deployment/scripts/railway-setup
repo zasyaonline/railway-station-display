@@ -136,6 +136,10 @@ install_files() {
   fi
   (cd "$ROOT" && npm install --omit=dev --silent)
   (cd "$ROOT/coach-position" && npm install --omit=dev --silent)
+  chown -R root:zasya "$ROOT"
+  chmod -R u=rwX,g=rX,o=rX "$ROOT"
+  chown -R zasya-display:zasya "$ROOT/data" "$ROOT/coach-position/data" "$DATA/platform" "$DATA/coach"
+  chmod -R ug+rwX "$ROOT/data" "$ROOT/coach-position/data" "$DATA/platform" "$DATA/coach"
   install -m 0755 "$SOURCE/deployment/kiosk/chromium-kiosk.sh" /usr/local/sbin/chromium-kiosk
   install -m 0755 "$SOURCE/deployment/kiosk/zasya-railway-display.sh" /usr/local/sbin/zasya-railway-display
   install -m 0755 "$SOURCE/deployment/scripts/railway-setup" /usr/local/sbin/railway-setup

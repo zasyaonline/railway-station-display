@@ -183,6 +183,9 @@ app.use(express.static(publicDir));
 const overridesPath = isAppliance()
   ? path.join(platformDataDir(), 'platform_overrides.json')
   : path.join(DATA_DIR, 'platform_overrides.json');
+const sessionsPath = isAppliance()
+  ? path.join(platformDataDir(), 'sessions.json')
+  : path.join(DATA_DIR, 'sessions.json');
 
 app.use('/api', createApiRouter({
   getCache,
@@ -190,6 +193,7 @@ app.use('/api', createApiRouter({
   stopRefresh: stopRefreshLoop,
   saveConfig,
   overridesPath,
+  sessionsPath,
   appliance: isAppliance(),
   getLicence: currentLicence,
   pinnedStation: () => (isAppliance() ? applianceConfig().stationCode : null)

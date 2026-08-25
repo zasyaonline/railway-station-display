@@ -39,7 +39,7 @@ function createApiRouter(deps) {
   const router = express.Router();
   const { getCache, startRefresh, stopRefresh, saveConfig } = deps;
   const dataDir = path.join(__dirname, '..', 'data');
-  const sessionsPath = path.join(dataDir, 'sessions.json');
+  const sessionsPath = deps.sessionsPath || path.join(dataDir, 'sessions.json');
   const overridesPath = deps.overridesPath || path.join(dataDir, 'platform_overrides.json');
   const adminKey = process.env.ADMIN_KEY || (isAppliance() || loadAdminSecret() ? null : 'chz-ops');
   const getLicence = deps.getLicence || (() => ({ operational: true, blocked: false }));
@@ -53,7 +53,12 @@ function createApiRouter(deps) {
   }
 
   function writeSessions(store) {
-    fs.writeFileSync(sessionsPath, JSON.stringify(store, null, 2));
+    try {
+      fs.mkdirSync(path.dirname(sessionsPath), { recursive: true });
+      fs.writeFileSync(sessionsPath, JSON.stringify(store, null, 2));
+    } catch (err) {
+      adminLog.warn('session write failed', { error: err.message, sessionsPath });
+    }
   }
 
   function readOverrides() {
