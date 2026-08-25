@@ -258,6 +258,8 @@ enable_services() {
     zasya-railway-coach.service zasya-railway-admin.service \
     zasya-railway-display.service zasya-railway-kiosk.service
   systemctl restart nginx
+  systemctl restart zasya-railway-ntes.service zasya-railway-platform.service \
+    zasya-railway-coach.service zasya-railway-admin.service
   systemctl start zasya-railway.target || fail "failed to start zasya-railway.target"
   systemctl start zasya-railway-display.service || true
   systemctl start zasya-railway-kiosk.service || true

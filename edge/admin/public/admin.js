@@ -405,7 +405,11 @@ async function unlock() {
       }
     }, 5000);
   } catch (err) {
-    $('gateError').textContent = err.status === 401 ? 'Invalid admin key' : err.message;
+    $('gateError').textContent = err.status === 401
+      ? 'Invalid admin key'
+      : err.status === 404
+        ? 'Admin API not loaded (HTTP 404). On the PC run: sudo systemctl restart nginx zasya-railway-admin zasya-railway-platform'
+        : err.message;
     $('gateError').hidden = false;
   }
 }
