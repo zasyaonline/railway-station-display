@@ -30,11 +30,37 @@ function parseDelay(delayStr) {
   return 0;
 }
 
-function buildStatus(ntesTrain) {
+function timeToMinutes(timeStr) {
+  if (!timeStr || timeStr === '--') return null;
+  const m = String(timeStr).match(/(\d{1,2}):(\d{2})/);
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
+}
+
+/** Minutes expected is after scheduled (handles midnight wrap). Early trains are 0. */
+function delayFromSchedule(scheduled, expected) {
+  const a = timeToMinutes(scheduled);
+  const b = timeToMinutes(expected);
+  if (a == null || b == null) return 0;
+  let diff = b - a;
+  if (diff < -720) diff += 1440;
+  if (diff < 0 || diff > 720) return 0;
+  return diff;
+}
+
+function resolveDelay(ntesTrain, scheduledArrival, scheduledDeparture, expectedArrival, expectedDeparture) {
+  return Math.max(
+    parseDelay(ntesTrain.DelayArr),
+    parseDelay(ntesTrain.DelayDep),
+    delayFromSchedule(scheduledArrival, expectedArrival),
+    delayFromSchedule(scheduledDeparture, expectedDeparture)
+  );
+}
+
+function buildStatus(ntesTrain, delay) {
   if (ntesTrain.Cancel === 1) return 'Cancelled';
   if (ntesTrain.ArrCancelFlag === 1 || ntesTrain.DepCancelFlag === 1) return 'Cancelled';
   if (ntesTrain.Diverted === 1) return 'Diverted';
-  const delay = Math.max(parseDelay(ntesTrain.DelayArr), parseDelay(ntesTrain.DelayDep));
   if (ntesTrain.DepFlag === '1') return 'Departed';
   if (ntesTrain.ArrFlag === '1') return 'Arrived';
   if (delay > 0) return `Late by ${delay} mins`;
@@ -90,11 +116,17 @@ function pickComposition(ntesTrain) {
 }
 
 function mapNtesLiveTrain(ntesTrain) {
-  const delay = Math.max(parseDelay(ntesTrain.DelayArr), parseDelay(ntesTrain.DelayDep));
   const scheduledArrival = extractTime(ntesTrain.STA);
   const scheduledDeparture = extractTime(ntesTrain.STD);
   const expectedArrival = extractTime(ntesTrain.ETA) || scheduledArrival;
   const expectedDeparture = extractTime(ntesTrain.ETD) || scheduledDeparture;
+  const delay = resolveDelay(
+    ntesTrain,
+    scheduledArrival,
+    scheduledDeparture,
+    expectedArrival,
+    expectedDeparture
+  );
   const { codes, classes, pwdPositions } = pickComposition(ntesTrain);
 
   return {
@@ -107,7 +139,7 @@ function mapNtesLiveTrain(ntesTrain) {
     expectedArrival,
     expectedDeparture,
     platform: ntesTrain.Platform != null && ntesTrain.Platform !== '' ? String(ntesTrain.Platform) : '-',
-    status: buildStatus(ntesTrain),
+    status: buildStatus(ntesTrain, delay),
     delay,
     runningState: getRunningState(ntesTrain),
     startDate: ntesTrain.StartDate || null,
@@ -148,5 +180,7 @@ module.exports = {
   parseCoachPositionString,
   parsePwdPositions,
   extractTime,
-  parseDelay
+  parseDelay,
+  delayFromSchedule,
+  resolveDelay
 };

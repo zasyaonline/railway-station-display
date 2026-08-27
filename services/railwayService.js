@@ -41,14 +41,20 @@ function parseDelay(delayStr) {
   return 0;
 }
 
-function buildStatus(ntesTrain) {
+function delayFromSchedule(scheduled, expected) {
+  const a = timeToMinutes(scheduled);
+  const b = timeToMinutes(expected);
+  if (a == null || b == null) return 0;
+  let diff = b - a;
+  if (diff < -720) diff += 1440;
+  if (diff < 0 || diff > 720) return 0;
+  return diff;
+}
+
+function buildStatus(ntesTrain, delay) {
   if (ntesTrain.Cancel === 1) return 'Cancelled';
   if (ntesTrain.ArrCancelFlag === 1 || ntesTrain.DepCancelFlag === 1) return 'Cancelled';
   if (ntesTrain.Diverted === 1) return 'Diverted';
-
-  const delayArr = parseDelay(ntesTrain.DelayArr);
-  const delayDep = parseDelay(ntesTrain.DelayDep);
-  const delay = Math.max(delayArr, delayDep);
 
   if (ntesTrain.DepFlag === '1') return 'Departed';
   if (ntesTrain.ArrFlag === '1') return 'Arrived';
@@ -73,10 +79,16 @@ function mapNtesTrain(ntesTrain, masterMap) {
 
   const delayArr = parseDelay(ntesTrain.DelayArr);
   const delayDep = parseDelay(ntesTrain.DelayDep);
-  const delay = Math.max(delayArr, delayDep);
-
   const scheduledArrival = extractTime(ntesTrain.STA);
   const scheduledDeparture = extractTime(ntesTrain.STD);
+  const expectedArrival = extractTime(ntesTrain.ETA) || scheduledArrival;
+  const expectedDeparture = extractTime(ntesTrain.ETD) || scheduledDeparture;
+  const delay = Math.max(
+    delayArr,
+    delayDep,
+    delayFromSchedule(scheduledArrival, expectedArrival),
+    delayFromSchedule(scheduledDeparture, expectedDeparture)
+  );
 
   return {
     trainNo,
@@ -85,10 +97,10 @@ function mapNtesTrain(ntesTrain, masterMap) {
     to: master?.to || ntesTrain.DestinationName,
     scheduledArrival: scheduledArrival || (master?.arrival !== '--' ? master?.arrival : null) || null,
     scheduledDeparture: scheduledDeparture || (master?.departure !== '--' ? master?.departure : null) || null,
-    expectedArrival: ntesTrain.ETA || scheduledArrival || null,
-    expectedDeparture: ntesTrain.ETD || scheduledDeparture || null,
+    expectedArrival: expectedArrival || (master?.arrival !== '--' ? master?.arrival : null) || null,
+    expectedDeparture: expectedDeparture || (master?.departure !== '--' ? master?.departure : null) || null,
     platform: ntesTrain.Platform || master?.defaultPlatform || '-',
-    status: buildStatus(ntesTrain),
+    status: buildStatus(ntesTrain, delay),
     delay,
     runningState: getRunningState(ntesTrain),
     startDate: ntesTrain.StartDate || null,

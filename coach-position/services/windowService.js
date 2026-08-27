@@ -172,6 +172,8 @@ function summarizeBoardTrains(boardTrains, now = new Date()) {
       platform: String(t.platform),
       expectedArrival: t.expectedArrival || t.scheduledArrival || null,
       expectedDeparture: t.expectedDeparture || t.scheduledDeparture || null,
+      scheduledArrival: t.scheduledArrival || null,
+      scheduledDeparture: t.scheduledDeparture || null,
       status: t.status || '—',
       delay: t.delay ?? 0,
       runningState: t.runningState || null,

@@ -228,16 +228,21 @@ function boardLookaheadMinutes(payload) {
 }
 
 function rowVisibleOnStationBoard(row, now, hideAfter, lookaheadMinutes) {
-  if (row.runningState === 'cancelled' || /cancel/i.test(row.status || '')) return false;
+  if (ntesCancelled(row)) return false;
+  if (ntesDeparted(row)) {
+    const depGone = clockMinutesUntil(eventTime(row, 'dep'), now);
+    return hideAfter > 0 && depGone != null && -depGone <= hideAfter;
+  }
   const arr = clockMinutesUntil(eventTime(row, 'arr'), now);
   const dep = clockMinutesUntil(eventTime(row, 'dep'), now);
+  const atPlatform = row.runningState === 'arrived' || /arriv/i.test(row.status || '');
+  const late =
+    Number(row.delay) > 0 || /late|delay|विलंब|ఆలస్య/i.test(row.status || '');
+  if (atPlatform || late) return true;
+  if ((arr != null && arr < 0) || (dep != null && dep < 0)) return true;
   const events = [arr, dep].filter((x) => x != null);
   if (!events.length) return true;
-  const minEvent = Math.min(...events);
-  const maxEvent = Math.max(...events);
-  const recentDepartGrace = Math.max(hideAfter, 20);
-  if (minEvent <= lookaheadMinutes && maxEvent >= -recentDepartGrace) return true;
-  return false;
+  return Math.min(...events) <= lookaheadMinutes;
 }
 
 function trainHasRake(t) {
@@ -389,6 +394,8 @@ function assembleFocus(payload, pick) {
       to: t.to || rake.to,
       expectedArrival: t.expectedArrival || rake.expectedArrival || t.scheduledArrival || rake.scheduledArrival,
       expectedDeparture: t.expectedDeparture || rake.expectedDeparture || t.scheduledDeparture || rake.scheduledDeparture,
+      scheduledArrival: t.scheduledArrival || rake.scheduledArrival || null,
+      scheduledDeparture: t.scheduledDeparture || rake.scheduledDeparture || null,
       minutesUntil: pick.minutesUntil,
       status: t.status || rake.status,
       delay: t.delay ?? rake.delay ?? 0
@@ -736,7 +743,7 @@ function fobBridgeOverlayHtml(trainPlatform, layout, youAreHere) {
   const anchor = fobScreenPct(layout, youAreHere);
   return `
     <div class="fob-bridge-overlay" style="--fob-anchor:${anchor.toFixed(2)}%" role="img" aria-label="${esc(label)}">
-      <img class="fob-bridge-art" src="${assetUrl('/img/amenities/fob-transparent.png')}" alt="" draggable="false">
+      <img class="fob-bridge-art" src="${assetUrl('/img/amenities/fob-steps.png')}" alt="" draggable="false">
     </div>`;
 }
 
@@ -953,9 +960,10 @@ function renderStationBoard(rows, focusTrainNo) {
   if (!visible.length) return '';
   const body = visible.map((r) => {
     const active = focusTrainNo && String(r.trainNo) === String(focusTrainNo);
+    const minsLate = trainDelayMinutes(r);
     const delay =
-      r.delay > 0
-        ? `<span class="delay">${esc(r.delay)} ${t('min')}</span>`
+      minsLate > 0
+        ? `<span class="delay">${esc(minsLate)} ${t('min')}</span>`
         : `<span class="ontime">—</span>`;
     return `
       <tr class="${active ? 'is-focus' : ''}">
@@ -994,13 +1002,28 @@ function prettyClock(timeStr) {
   return String(timeStr).trim();
 }
 
+function delayFromClocks(scheduled, expected) {
+  const a = timeToMinutes(scheduled);
+  const b = timeToMinutes(expected);
+  if (a == null || b == null) return 0;
+  let diff = b - a;
+  if (diff < -720) diff += 1440;
+  if (diff < 0 || diff > 720) return 0;
+  return diff;
+}
+
 function trainDelayMinutes(train) {
-  const n = Number(train?.delay);
-  if (Number.isFinite(n) && n > 0) return n;
+  const fromField = Number(train?.delay);
   const status = String(train?.status || '');
   const m = status.match(/(\d+)/);
-  if (m && /late|delay|विलंब|आलस्य|ఆలస్య/i.test(status)) return Number(m[1]);
-  return 0;
+  const fromStatus =
+    m && /late|delay|विलंब|आलस्य|ఆలస్య/i.test(status) ? Number(m[1]) : 0;
+  return Math.max(
+    Number.isFinite(fromField) && fromField > 0 ? fromField : 0,
+    fromStatus,
+    delayFromClocks(train?.scheduledArrival, train?.expectedArrival),
+    delayFromClocks(train?.scheduledDeparture, train?.expectedDeparture)
+  );
 }
 
 function focusScheduleHtml(train) {

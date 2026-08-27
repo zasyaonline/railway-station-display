@@ -236,7 +236,7 @@ body.theme-chart .amenity-access-badge {
 }
 
 body.theme-chart .fob-bridge-art {
-  opacity: 0.75;
+  opacity: 1;
 }
 
 body.theme-chart .walk-cell { border-left-color: rgba(148, 163, 184, 0.25); }

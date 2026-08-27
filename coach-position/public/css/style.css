@@ -847,27 +847,25 @@ body {
 .fob-bridge-overlay {
   position: absolute;
   left: var(--fob-anchor, 70%);
-  /* Sit on the amenities / far side of the platform (not the yellow line). */
   top: auto;
   bottom: 0.15rem;
-  --fob-stair-start: 4.8%;
-  transform: translateX(calc(-1 * var(--fob-stair-start)));
-  width: min(16%, 190px);
-  height: min(42%, 150px);
+  transform: translateX(-50%);
+  width: min(7.5%, 88px);
+  height: min(28%, 110px);
   z-index: 6;
   pointer-events: none;
   display: flex;
   align-items: flex-end;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .fob-bridge-art {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  object-position: left bottom;
-  opacity: 0.78;
-  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
+  object-position: center bottom;
+  opacity: 1;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
 /*
