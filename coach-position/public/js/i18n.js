@@ -50,7 +50,7 @@ window.COACH_I18N = {
     stationFacilities: 'Station facilities',
     amenityToilet: 'Toilet',
     amenityToiletAccess: 'Accessible toilet',
-    amenityFob: 'Foot over bridge',
+    amenityFob: 'Foot Over Bridge',
     amenityWater: 'Drinking water',
     amenityWaiting: 'Waiting room',
     amenityOffice: 'Station Master',

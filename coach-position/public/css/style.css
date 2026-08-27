@@ -850,22 +850,34 @@ body {
   top: auto;
   bottom: 0.15rem;
   transform: translateX(-50%);
-  width: min(7.5%, 88px);
-  height: min(28%, 110px);
+  width: min(12%, 140px);
+  height: auto;
   z-index: 6;
   pointer-events: none;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.12rem;
 }
 
 .fob-bridge-art {
-  width: 100%;
-  height: 100%;
+  width: min(72px, 100%);
+  height: min(88px, 18vh);
   object-fit: contain;
   object-position: center bottom;
   opacity: 1;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+.fob-bridge-label {
+  font-size: clamp(0.62rem, 1.05vw, 0.88rem);
+  font-weight: 800;
+  color: #f8fafc;
+  text-align: center;
+  line-height: 1.15;
+  max-width: 100%;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 
 /*

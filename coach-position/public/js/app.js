@@ -744,6 +744,7 @@ function fobBridgeOverlayHtml(trainPlatform, layout, youAreHere) {
   return `
     <div class="fob-bridge-overlay" style="--fob-anchor:${anchor.toFixed(2)}%" role="img" aria-label="${esc(label)}">
       <img class="fob-bridge-art" src="${assetUrl('/img/amenities/fob-steps.png')}" alt="" draggable="false">
+      <span class="fob-bridge-label">${esc(label)}</span>
     </div>`;
 }
 

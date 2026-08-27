@@ -497,8 +497,8 @@ body.theme-premium .amenity-access-badge {
 body.theme-premium .fob-bridge-overlay {
   top: auto;
   bottom: 0.1rem;
-  width: min(7.2%, 84px);
-  height: min(26%, 105px);
+  width: min(13%, 150px);
+  height: auto;
   z-index: 7;
   filter: none;
 }
@@ -506,6 +506,14 @@ body.theme-premium .fob-bridge-overlay {
 body.theme-premium .fob-bridge-art {
   opacity: 1;
   object-position: center bottom;
+  width: min(76px, 100%);
+  height: min(90px, 18vh);
+}
+
+body.theme-premium .fob-bridge-label {
+  color: #ffffff;
+  text-transform: none;
+  letter-spacing: 0.01em;
 }
 
 body.theme-premium .walk-strip,

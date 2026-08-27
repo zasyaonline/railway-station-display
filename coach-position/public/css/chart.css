@@ -239,6 +239,11 @@ body.theme-chart .fob-bridge-art {
   opacity: 1;
 }
 
+body.theme-chart .fob-bridge-label {
+  color: #111827;
+  text-shadow: none;
+}
+
 body.theme-chart .walk-cell { border-left-color: rgba(148, 163, 184, 0.25); }
 body.theme-chart .walk-cell .walk-dist { color: #111827; }
 body.theme-chart .walk-cell .walk-time { color: #1d4ed8; }
