@@ -9,12 +9,14 @@ const CONFIG = window.PDS_CONFIG || {};
 const API_BASE = CONFIG.API_BASE || '';
 const REFRESH_MS_DEFAULT = CONFIG.REFRESH_MS || 30_000;
 const SESSION_KEY = 'pds_session_id';
+const FETCH_TIMEOUT_MS = 8000;
 
 let refreshTimer = null;
 let rotateTimer = null;
 let refreshIntervalMs = REFRESH_MS_DEFAULT;
 let refreshEnabled = true;
 let sessionStopped = false;
+let linkDown = false;
 
 let allTrains = [];
 let pageIndex = 0;
@@ -30,6 +32,55 @@ let lastUpdatedIso = null;
 
 function $(id) {
   return document.getElementById(id);
+}
+
+function fetchWithTimeout(url, options = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+  return fetch(url, { cache: 'no-store', ...options, signal: ctrl.signal }).finally(() => {
+    clearTimeout(timer);
+  });
+}
+
+function ensureLinkDownOverlay() {
+  let el = $('linkDownOverlay');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'linkDownOverlay';
+  el.className = 'link-down-overlay';
+  el.hidden = true;
+  el.setAttribute('role', 'alert');
+  document.body.appendChild(el);
+  return el;
+}
+
+function paintLinkDownOverlay() {
+  const el = ensureLinkDownOverlay();
+  const last = lastUpdatedIso
+    ? `${t('lastReceived')}: ${new Date(lastUpdatedIso).toLocaleString(currentLocale())}`
+    : '';
+  el.innerHTML = `
+    <div class="link-down-card">
+      <p class="link-down-kicker">${t('offline')}</p>
+      <h2>${t('linkDownTitle')}</h2>
+      <p>${t('linkDownBody')}</p>
+      ${last ? `<p class="link-down-meta">${last}</p>` : ''}
+      <p class="link-down-retry">${t('linkDownRetry')}</p>
+    </div>`;
+}
+
+function setLinkDown(down) {
+  if (sessionStopped) down = false;
+  linkDown = Boolean(down);
+  const el = ensureLinkDownOverlay();
+  el.hidden = !linkDown;
+  document.body.classList.toggle('link-down', linkDown);
+  if (linkDown) {
+    paintLinkDownOverlay();
+    updateRefreshStatusLabel();
+  } else {
+    updateRefreshStatusLabel();
+  }
 }
 
 function getSessionId() {
@@ -151,6 +202,11 @@ function updateRefreshStatusLabel() {
   if (sessionStopped) {
     statusEl.innerHTML = `● <span>${t('stoppedStatus')}</span>`;
     statusEl.className = 'refresh-status paused';
+    return;
+  }
+  if (linkDown) {
+    statusEl.innerHTML = `● <span>${t('offline')}</span>`;
+    statusEl.className = 'refresh-status offline';
     return;
   }
   if (refreshEnabled) {
@@ -291,6 +347,10 @@ function advanceDisplayRotation() {
   }
   applyI18nChrome();
   updateStationHeading();
+  if (linkDown) {
+    paintLinkDownOverlay();
+    return;
+  }
   renderTable();
 }
 
@@ -369,6 +429,7 @@ function updateMeta(data) {
 function showSessionStopped() {
   sessionStopped = true;
   refreshEnabled = false;
+  setLinkDown(false);
   if (refreshTimer) {
     clearInterval(refreshTimer);
     refreshTimer = null;
@@ -401,12 +462,11 @@ async function loadTrains() {
   if (sessionStopped) return;
 
   try {
-    const res = await fetch(trainsUrl(), {
+    const res = await fetchWithTimeout(trainsUrl(), {
       headers: {
         'X-Session-Id': getSessionId(),
         Accept: 'application/json'
-      },
-      cache: 'no-store'
+      }
     });
 
     const contentType = res.headers.get('content-type') || '';
@@ -431,6 +491,7 @@ async function loadTrains() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     if (!data || !Array.isArray(data.trains)) throw new Error('Invalid trains payload');
 
+    setLinkDown(false);
     allTrains = data.trains;
     if (pageIndex >= pageCount()) pageIndex = 0;
     updateMeta(data);
@@ -439,17 +500,14 @@ async function loadTrains() {
   } catch (err) {
     console.error('Failed to load trains:', err);
     if (refreshEnabled && !sessionStopped) {
-      $('trainBody').innerHTML = `
-        <tr class="no-trains">
-          <td colspan="8">${t('unable')}</td>
-        </tr>`;
+      setLinkDown(true);
     }
   }
 }
 
 async function loadRefreshStatus() {
   try {
-    const res = await fetch(`${API_BASE}/api/refresh/status`);
+    const res = await fetchWithTimeout(`${API_BASE}/api/refresh/status`);
     if (res.ok) {
       const data = await res.json();
       updateRefreshUI(data.refreshEnabled !== false);
@@ -472,7 +530,7 @@ async function setRefresh(action) {
       newSessionId();
     }
 
-    const res = await fetch(`${API_BASE}/api/refresh/${action}`, { method: 'POST', cache: 'no-store' });
+    const res = await fetchWithTimeout(`${API_BASE}/api/refresh/${action}`, { method: 'POST' });
     const data = await res.json();
     updateRefreshUI(data.refreshEnabled);
     if (data.refreshEnabled) await loadTrains();
@@ -494,4 +552,7 @@ $('btnStop').addEventListener('click', () => setRefresh('stop'));
 applyI18nChrome();
 updateClock();
 setInterval(updateClock, 1000);
+window.addEventListener('offline', () => setLinkDown(true));
+window.addEventListener('online', () => loadTrains());
+if (typeof navigator !== 'undefined' && navigator.onLine === false) setLinkDown(true);
 loadRefreshStatus().then(loadTrains);

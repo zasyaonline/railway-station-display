@@ -10,8 +10,11 @@ const WALK_SPEED_MPS = 0.65;
 /** Full platform rake grid. Short trains occupy slots from the engine; the rest stay empty. */
 const PLATFORM_SLOTS = 26;
 const FOCUS_ROTATE_MS = 20000;
+const FETCH_TIMEOUT_MS = 8000;
 
 let sessionStopped = false;
+let linkDown = false;
+let lastReceivedIso = null;
 
 let languages = ['en', 'te', 'hi'];
 let langIndex = 0;
@@ -26,6 +29,13 @@ let focusRotateKey = '';
 let skipFocusArrive = false;
 
 function $(id) { return document.getElementById(id); }
+function fetchWithTimeout(url, options = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+  return fetch(url, { cache: 'no-store', ...options, signal: ctrl.signal }).finally(() => {
+    clearTimeout(timer);
+  });
+}
 function qs(name) {
   return new URLSearchParams(location.search).get(name);
 }
@@ -429,7 +439,7 @@ function updateClock() {
   $('langLabel').textContent = t('lang');
   document.documentElement.lang = currentLang();
   const minute = now.getHours() * 60 + now.getMinutes();
-  if (lastPayload && minute !== lastPickMinute) {
+  if (lastPayload && !linkDown && minute !== lastPickMinute) {
     lastPickMinute = minute;
     render(lastPayload);
   }
@@ -907,7 +917,7 @@ function headingBanner(heading) {
 function ensureFocusRotation() {
   if (focusRotateTimer) return;
   focusRotateTimer = setInterval(() => {
-    if (!lastPayload) return;
+    if (!lastPayload || linkDown) return;
     const live = overlappingFocusPicks(lastPayload);
     if (live.length <= 1) return;
     focusRotateIndex = (focusRotateIndex + 1) % live.length;
@@ -1232,7 +1242,7 @@ async function loadTypes() {
   const apiRoot = liveApiRoot();
   if (apiRoot !== null) {
     try {
-      const res = await fetch(`${apiRoot}/api/coach-types`);
+      const res = await fetchWithTimeout(`${apiRoot}/api/coach-types`);
       if (res.ok) {
         typesDoc = await res.json();
         return;
@@ -1240,14 +1250,14 @@ async function loadTypes() {
     } catch { /* fall through */ }
   }
   try {
-    const res = await fetch('/data/coach_types.json', { cache: 'no-store' });
+    const res = await fetchWithTimeout('/data/coach_types.json');
     if (res.ok) typesDoc = await res.json();
   } catch { /* ignore */ }
 }
 
 async function loadStations() {
   try {
-    const res = await fetch('/data/stations.json', { cache: 'no-store' });
+    const res = await fetchWithTimeout('/data/stations.json');
     if (res.ok) {
       const master = await res.json();
       stationsByNameMap = window.COACH_stationsByName ? window.COACH_stationsByName(master) : {};
@@ -1262,7 +1272,7 @@ async function loadLayout() {
   ];
   for (const url of urls) {
     try {
-      const res = await fetch(url, { cache: 'no-store' });
+      const res = await fetchWithTimeout(url);
       if (res.ok) {
         stationLayout = await res.json();
         return;
@@ -1280,7 +1290,7 @@ async function loadDisplaysDoc() {
   ].filter(Boolean);
   for (const url of urls) {
     try {
-      const res = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } });
+      const res = await fetchWithTimeout(url, { headers: { Accept: 'application/json' } });
       const ct = res.headers.get('content-type') || '';
       if (!res.ok || !ct.includes('application/json')) continue;
       displaysDocCache = await res.json();
@@ -1290,8 +1300,51 @@ async function loadDisplaysDoc() {
   return displaysDocCache;
 }
 
+function ensureLinkDownOverlay() {
+  let el = $('linkDownOverlay');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'linkDownOverlay';
+  el.className = 'link-down-overlay';
+  el.hidden = true;
+  el.setAttribute('role', 'alert');
+  document.body.appendChild(el);
+  return el;
+}
+
+function paintLinkDownOverlay() {
+  const el = ensureLinkDownOverlay();
+  const last = lastReceivedIso
+    ? `${t('lastReceived')}: ${new Date(lastReceivedIso).toLocaleString(locale())}`
+    : '';
+  el.innerHTML = `
+    <div class="link-down-card">
+      <p class="link-down-kicker">${esc(t('offline'))}</p>
+      <h2>${esc(t('linkDownTitle'))}</h2>
+      <p>${esc(t('linkDownBody'))}</p>
+      ${last ? `<p class="link-down-meta">${esc(last)}</p>` : ''}
+      <p class="link-down-retry">${esc(t('linkDownRetry'))}</p>
+    </div>`;
+}
+
+function setLinkDown(down) {
+  if (sessionStopped) down = false;
+  linkDown = Boolean(down);
+  const el = ensureLinkDownOverlay();
+  el.hidden = !linkDown;
+  document.body.classList.toggle('link-down', linkDown);
+  if (linkDown) paintLinkDownOverlay();
+}
+
+function acceptBoardPayload(data, displaysDoc) {
+  lastReceivedIso = data.generatedAt || data.liveFetchedAt || new Date().toISOString();
+  setLinkDown(false);
+  render(applyDisplay(data, displaysDoc));
+}
+
 function showSessionStopped() {
   sessionStopped = true;
+  setLinkDown(false);
   $('board').innerHTML = `
     <div class="idle session-stopped">
       ${esc(t('sessionStopped'))}
@@ -1318,12 +1371,9 @@ async function loadBoard() {
   const apiRoot = liveApiRoot();
   if (apiRoot !== null) {
     try {
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `${apiRoot}/api/coach-board?station=${encodeURIComponent(station)}&display=${encodeURIComponent(display)}&sessionId=${encodeURIComponent(sessionId)}`,
-        {
-          cache: 'no-store',
-          headers: { 'X-Session-Id': sessionId, Accept: 'application/json' }
-        }
+        { headers: { 'X-Session-Id': sessionId, Accept: 'application/json' } }
       );
       const data = await res.json().catch(() => null);
       if (isSessionStoppedPayload(data) || (res.status === 409 && isSessionStoppedPayload(data))) {
@@ -1332,11 +1382,12 @@ async function loadBoard() {
         return;
       }
       if (res.ok && data && (data.platforms || data.focus || data.stationBoard)) {
-        render(applyDisplay(data, displaysDoc));
+        acceptBoardPayload(data, displaysDoc);
         return;
       }
     } catch {
-      /* fall through to static cache */
+      setLinkDown(true);
+      return;
     }
   }
 
@@ -1346,20 +1397,23 @@ async function loadBoard() {
   ].filter(Boolean);
   for (const url of urls) {
     try {
-      const res = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } });
+      const res = await fetchWithTimeout(url, { headers: { Accept: 'application/json' } });
       if (!res.ok) continue;
       const ct = res.headers.get('content-type') || '';
       if (!ct.includes('application/json')) continue;
       const data = await res.json();
       if (data.platforms || data.focus || data.stationBoard) {
-        render(applyDisplay(data, displaysDoc));
+        acceptBoardPayload(data, displaysDoc);
         return;
       }
     } catch {
-      /* next */
+      /* next url */
     }
   }
-  $('board').innerHTML = `<div class="idle">Unable to load: no board cache for ${esc(station)}</div>`;
+  setLinkDown(true);
+  if (!lastPayload) {
+    $('board').innerHTML = `<div class="idle">${esc(t('linkDownTitle'))}</div>`;
+  }
 }
 
 if ($('bootLoading')) $('bootLoading').textContent = t('loading');
@@ -1368,9 +1422,18 @@ setInterval(updateClock, 1000);
 setInterval(() => {
   if (sessionStopped) return;
   langIndex = (langIndex + 1) % languages.length;
+  if (linkDown) {
+    paintLinkDownOverlay();
+    updateClock();
+    return;
+  }
   if (lastPayload) render(lastPayload);
   else updateClock();
 }, LANG_MS);
+
+window.addEventListener('offline', () => setLinkDown(true));
+window.addEventListener('online', () => loadBoard());
+if (typeof navigator !== 'undefined' && navigator.onLine === false) setLinkDown(true);
 
 Promise.all([loadTypes(), loadLayout(), loadStations(), loadDisplaysDoc()]).then(loadBoard);
 setInterval(loadBoard, REFRESH_MS);
