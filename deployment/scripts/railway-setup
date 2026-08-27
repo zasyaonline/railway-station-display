@@ -16,6 +16,7 @@ LICENCE_SRC=""
 LICENCE_PUB=""
 ADMIN_PW_FILE=""
 GRACE=""
+EXPIRING_DAYS="7"
 KIOSK="http://127.0.0.1/platform/"
 NTES_ENDPOINT="https://enquiry.indianrail.gov.in/crisns/AppServAnd"
 NTES_USER_FILE=""
@@ -32,7 +33,7 @@ Usage:
   railway-setup [--validate-only]
   railway-setup --non-interactive --station-code CODE --station-name NAME \
     --licence FILE --licence-public-key FILE --admin-password-file FILE \
-    --grace-hours N [--kiosk-url URL] [--ntes-endpoint URL] \
+    --grace-hours N [--expiring-days N] [--kiosk-url URL] [--ntes-endpoint URL] \
     [--ntes-user-file FILE] [--ntes-pass-file FILE] [--harden-ssh] \
     [--source DIR]
 
@@ -163,7 +164,7 @@ install_files() {
 
 write_config() {
   note "==> Station configuration"
-  local station_code station_name licence_src ntes_endpoint ntes_user ntes_pass grace kiosk admin_pass admin_pass2 licence_pub
+  local station_code station_name licence_src ntes_endpoint ntes_user ntes_pass grace expiring_days kiosk admin_pass admin_pass2 licence_pub
 
   if [[ "$NON_INTERACTIVE" == "1" ]]; then
     station_code="$STATION_CODE"
@@ -173,6 +174,7 @@ write_config() {
     ntes_endpoint="$NTES_ENDPOINT"
     grace="$GRACE"
     kiosk="$KIOSK"
+    expiring_days="$EXPIRING_DAYS"
     ntes_user="$(read_file_secret "$NTES_USER_FILE")"
     ntes_pass="$(read_file_secret "$NTES_PASS_FILE")"
     admin_pass="$(read_file_secret "$ADMIN_PW_FILE")"
@@ -191,6 +193,8 @@ write_config() {
     ntes_user="$(read_secret "NTES username (blank if unused): ")"
     ntes_pass="$(read_secret "NTES password (blank if unused): ")"
     read -r -p "Licence grace period hours (required, operator-set): " grace
+    read -r -p "Expiring warning days [$EXPIRING_DAYS]: " expiring_days
+    expiring_days="${expiring_days:-$EXPIRING_DAYS}"
     read -r -p "Kiosk URL [$KIOSK]: " kiosk
     kiosk="${kiosk:-$KIOSK}"
     admin_pass="$(read_secret "Admin password: ")"
@@ -209,6 +213,7 @@ write_config() {
     --ntes-user "$ntes_user" \
     --ntes-pass "$ntes_pass" \
     --grace "$grace" \
+    --expiring-days "${expiring_days:-$EXPIRING_DAYS}" \
     --kiosk "$kiosk"
   chmod 0640 "$ETC/config.json" "$ETC/ntes.json"
   chown root:zasya "$ETC/config.json"
@@ -305,7 +310,7 @@ print_result() {
     note ""
     note "INSTALLATION READY"
     note "Platform: http://${ip}/platform/"
-    note "Coach:    http://${ip}/coach/?station=BG&display=entrance-main"
+    note "Coach:    http://${ip}/coach/chart.html?station=BG&display=entrance-main"
     note "Admin:    http://${ip}/admin/"
     note "Health:   http://${ip}/health"
     note "Verify:   http://${ip}/admin/verify.html"
@@ -331,6 +336,7 @@ parse_args() {
       --licence-public-key) LICENCE_PUB="$2"; shift 2 ;;
       --admin-password-file) ADMIN_PW_FILE="$2"; shift 2 ;;
       --grace-hours) GRACE="$2"; shift 2 ;;
+      --expiring-days) EXPIRING_DAYS="$2"; shift 2 ;;
       --kiosk-url) KIOSK="$2"; shift 2 ;;
       --ntes-endpoint) NTES_ENDPOINT="$2"; shift 2 ;;
       --ntes-user-file) NTES_USER_FILE="$2"; shift 2 ;;

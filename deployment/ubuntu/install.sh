@@ -63,6 +63,7 @@ bash "${SOURCE}/deployment/scripts/railway-setup" \
   --licence-public-key "$LICENCE_PUB" \
   --admin-password-file "$ADMIN_PW_FILE" \
   --grace-hours 24 \
+  --expiring-days 7 \
   --kiosk-url http://127.0.0.1/platform/
 
 echo "==> Acceptance (HTTP on :80)"
@@ -78,6 +79,6 @@ cat /root/zasya-admin-password
 echo ""
 echo "Open from this Mac / LAN:"
 echo "  Platform: http://${IP}/platform/"
-echo "  Coach:    http://${IP}/coach/?station=BG&display=entrance-main"
+echo "  Coach:    http://${IP}/coach/chart.html?station=BG&display=entrance-main"
 echo "  Admin:    http://${IP}/admin/"
 echo "  Health:   http://${IP}/health"

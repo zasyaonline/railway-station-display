@@ -20,7 +20,8 @@ const checked = validateConfig({
     staleAfterSeconds: 180
   },
   licence: {
-    gracePeriodHours: arg('grace') === '' ? null : Number(arg('grace'))
+    gracePeriodHours: arg('grace') === '' ? null : Number(arg('grace')),
+    expiringWarningDays: arg('expiring-days') === '' ? 7 : Number(arg('expiring-days'))
   }
 });
 if (!checked.ok) {

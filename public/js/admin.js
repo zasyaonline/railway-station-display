@@ -166,17 +166,31 @@ function setPlatformStatus(message, isError) {
   el.className = `station-status${isError ? ' error' : ''}`;
 }
 
+function lockStationEditor() {
+  document.body.classList.add('station-locked');
+  const btn = $('btnApplyStation');
+  if (btn) {
+    btn.disabled = true;
+    btn.hidden = true;
+  }
+  const preset = $('stationPreset');
+  if (preset) preset.disabled = true;
+  const code = $('stationCodeInput');
+  if (code) {
+    code.readOnly = true;
+    code.disabled = true;
+  }
+  const pinHelp = $('stationPinnedHelp');
+  if (pinHelp) pinHelp.hidden = false;
+}
+
 function renderSessions(data) {
   $('activeCount').textContent = String(data.activeCount ?? 0);
   $('refreshState').textContent = data.refreshEnabled ? 'LIVE' : 'PAUSED';
   $('refreshState').className = `stat-value ${data.refreshEnabled ? 'live' : 'paused'}`;
 
-  if (data.stationPinned) {
-    $('btnApplyStation').disabled = true;
-    $('stationPreset').disabled = true;
-    $('stationCodeInput').readOnly = true;
-    const pinHelp = $('stationPinnedHelp');
-    if (pinHelp) pinHelp.hidden = false;
+  if (data.stationPinned || $('licenceChip')) {
+    lockStationEditor();
   }
 
   if (Array.isArray(data.stationPresets) && data.stationPresets.length) {
@@ -347,7 +361,8 @@ async function loadApplianceStatus() {
   try {
     const status = await api('/api/admin/status');
     licenceEl.textContent = status.licenceState || status.licence || '—';
-    licenceEl.className = `stat-value ${(status.licenceState || status.licence) === 'VALID' ? 'live' : 'paused'}`;
+    const lic = String(status.licenceState || status.licence || '').toUpperCase();
+    licenceEl.className = `stat-value ${lic === 'VALID' ? 'live' : 'paused'}`;
     if ($('ntesChip')) {
       const ntes = status.ntes || '—';
       $('ntesChip').textContent = String(ntes).toUpperCase();
@@ -363,6 +378,10 @@ async function loadApplianceStatus() {
 }
 
 async function applyStation() {
+  if (document.body.classList.contains('station-locked')) {
+    setStationStatus('Station identity is locked for this installation', true);
+    return;
+  }
   const stationCode = $('stationCodeInput').value.trim();
   const btn = $('btnApplyStation');
   btn.disabled = true;

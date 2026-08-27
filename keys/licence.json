@@ -1,12 +1,12 @@
 {
-  "licenceId": "ZSY-BG-SAMPLE-2026",
+  "licenceId": "ZSY-BG-DEMO-30D",
   "stationCode": "BG",
   "products": [
     "platform",
     "coach"
   ],
-  "validFrom": "2026-08-25",
-  "validUntil": "2027-08-25",
+  "validFrom": "2026-08-27",
+  "validUntil": "2026-09-26",
   "installationId": "",
-  "signature": "JPe8AzTEdawI1rf6L+xUxjx0mgWNajNfKfVSlwfmo4HsI5QVQ6PDj2jDTH2512kSoY0s9Jl3KhgsLxnb+W6yBg=="
+  "signature": "aP5722QVi8us/oOQVh6t2GWVLlheVDv2J0S1Rp8+chegB79LsCC6Mz73GEdd/uAFViyiYbBoWgJhJkPFnf4DBQ=="
 }

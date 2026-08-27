@@ -8,7 +8,7 @@ const { ensureRuntimeLayout } = require('../runtime/layout');
 const { startHeartbeat } = require('../runtime/heartbeat');
 const { loadConfig } = require('../config/config-service');
 const { collectHealth } = require('../health/health-service');
-const { evaluateFromDisk, isPassengerBlocked } = require('../licence/licence-service');
+const { evaluateFromDisk, isPassengerBlocked, publicLicenceView } = require('../licence/licence-service');
 const { requireAdmin, providedKey } = require('./auth');
 const { recordAudit, readAuditTail } = require('../audit/audit-service');
 const { exportPackage, restorePackage } = require('../backup/backup-service');
@@ -74,7 +74,8 @@ function createAdminApp() {
       reason: evaluation.reason,
       stationCode: evaluation.licence?.stationCode || null,
       products: evaluation.licence?.products || [],
-      validUntil: evaluation.licence?.validUntil || null
+      validUntil: evaluation.licence?.validUntil || null,
+      daysLeft: publicLicenceView(evaluation)?.daysLeft ?? null
     });
   });
 

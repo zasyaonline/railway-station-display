@@ -222,6 +222,27 @@ function gracePath({ reason, persistedState, gracePeriodHours, now, finish, cloc
   });
 }
 
+function daysLeftUntil(validUntil, now = new Date()) {
+  if (!validUntil) return null;
+  const until = new Date(`${validUntil}T23:59:59Z`);
+  const days = (until.getTime() - now.getTime()) / 86_400_000;
+  if (!Number.isFinite(days)) return null;
+  return Math.ceil(days);
+}
+
+function publicLicenceView(evaluation, now = new Date()) {
+  if (!evaluation) return null;
+  const validUntil = evaluation.licence?.validUntil || null;
+  return {
+    state: evaluation.state,
+    blocked: Boolean(evaluation.blocked) || evaluation.operational === false,
+    operational: evaluation.operational !== false,
+    validUntil,
+    daysLeft: daysLeftUntil(validUntil, now),
+    reason: evaluation.reason || null
+  };
+}
+
 function evaluateFromDisk(options = {}) {
   const publicKeyPem = options.publicKeyPem || loadPublicKey(options.publicKeyPath);
   const licenceRaw = options.licenceRaw !== undefined
@@ -246,5 +267,7 @@ module.exports = {
   loadPersistedState,
   evaluateLicence,
   evaluateFromDisk,
-  isPassengerBlocked
+  isPassengerBlocked,
+  daysLeftUntil,
+  publicLicenceView
 };

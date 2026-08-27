@@ -17,6 +17,8 @@ let refreshIntervalMs = REFRESH_MS_DEFAULT;
 let refreshEnabled = true;
 let sessionStopped = false;
 let linkDown = false;
+let licenceExpired = false;
+let lastLicenceView = null;
 
 let allTrains = [];
 let pageIndex = 0;
@@ -70,7 +72,7 @@ function paintLinkDownOverlay() {
 }
 
 function setLinkDown(down) {
-  if (sessionStopped) down = false;
+  if (sessionStopped || licenceExpired) down = false;
   linkDown = Boolean(down);
   const el = ensureLinkDownOverlay();
   el.hidden = !linkDown;
@@ -80,6 +82,103 @@ function setLinkDown(down) {
     updateRefreshStatusLabel();
   } else {
     updateRefreshStatusLabel();
+  }
+}
+
+function isLicenceBlockedPayload(data) {
+  if (!data) return false;
+  const state = String(data.state || '').toUpperCase();
+  return data.error === 'licence_blocked' || data.blocked === true
+    || state === 'BLOCKED' || state === 'INVALID' || state === 'MISSING';
+}
+
+function formatLicenceUntil(isoDate) {
+  if (!isoDate) return '';
+  return new Date(`${isoDate}T23:59:59Z`).toLocaleDateString(currentLocale(), {
+    day: 'numeric', month: 'short', year: 'numeric'
+  });
+}
+
+function ensureLicenceExpiredOverlay() {
+  let el = $('licenceExpiredOverlay');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'licenceExpiredOverlay';
+  el.className = 'link-down-overlay licence-expired-overlay';
+  el.hidden = true;
+  el.setAttribute('role', 'alertdialog');
+  document.body.appendChild(el);
+  return el;
+}
+
+function paintLicenceExpiredOverlay(data) {
+  const el = ensureLicenceExpiredOverlay();
+  const until = data?.validUntil ? `${t('validUntil')}: ${formatLicenceUntil(data.validUntil)}` : '';
+  el.innerHTML = `
+    <div class="link-down-card">
+      <p class="link-down-kicker">${t('licenceExpiredKicker')}</p>
+      <h2>${t('licenceExpiredTitle')}</h2>
+      <p>${t('licenceExpiredBody')}</p>
+      ${until ? `<p class="link-down-meta">${until}</p>` : ''}
+    </div>`;
+}
+
+function setLicenceExpired(data) {
+  licenceExpired = Boolean(data);
+  const el = ensureLicenceExpiredOverlay();
+  el.hidden = !licenceExpired;
+  document.body.classList.toggle('licence-expired', licenceExpired);
+  if (licenceExpired) {
+    setLinkDown(false);
+    paintLicenceExpiredOverlay(data);
+  }
+  updateRefreshStatusLabel();
+}
+
+function ensureLicenceExpiringBanner() {
+  let el = $('licenceExpiringBanner');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'licenceExpiringBanner';
+  el.className = 'licence-expiring-banner';
+  el.hidden = true;
+  el.setAttribute('role', 'status');
+  document.body.appendChild(el);
+  return el;
+}
+
+function setLicenceExpiring(data) {
+  const el = ensureLicenceExpiringBanner();
+  const show = Boolean(data) && !licenceExpired && String(data.state || '').toUpperCase() === 'EXPIRING';
+  el.hidden = !show;
+  document.body.classList.toggle('licence-expiring', show);
+  if (!show) return;
+  el.textContent = t('licenceExpiring')
+    .replace('{date}', formatLicenceUntil(data.validUntil))
+    .replace('{n}', String(Math.max(0, data.daysLeft ?? 0)));
+}
+
+function applyLicenceUi(data) {
+  if (!data) return;
+  lastLicenceView = data;
+  if (isLicenceBlockedPayload(data)) {
+    setLicenceExpired(data);
+    setLicenceExpiring(null);
+    return;
+  }
+  setLicenceExpired(null);
+  setLicenceExpiring(data);
+}
+
+async function refreshLicenceStatus() {
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/api/licence/status`, {
+      headers: { Accept: 'application/json' }
+    });
+    if (!res.ok) return;
+    applyLicenceUi(await res.json());
+  } catch {
+    /* cloud / local without licence endpoint */
   }
 }
 
@@ -193,6 +292,8 @@ function applyI18nChrome() {
   }
 
   updateRefreshStatusLabel();
+  if (licenceExpired && lastLicenceView) paintLicenceExpiredOverlay(lastLicenceView);
+  else if (lastLicenceView) applyLicenceUi(lastLicenceView);
   updateClock();
 }
 
@@ -202,6 +303,11 @@ function updateRefreshStatusLabel() {
   if (sessionStopped) {
     statusEl.innerHTML = `● <span>${t('stoppedStatus')}</span>`;
     statusEl.className = 'refresh-status paused';
+    return;
+  }
+  if (licenceExpired) {
+    statusEl.innerHTML = `● <span>${t('licenceExpiredKicker')}</span>`;
+    statusEl.className = 'refresh-status offline';
     return;
   }
   if (linkDown) {
@@ -347,6 +453,10 @@ function advanceDisplayRotation() {
   }
   applyI18nChrome();
   updateStationHeading();
+  if (licenceExpired) {
+    paintLicenceExpiredOverlay({ validUntil: null });
+    return;
+  }
   if (linkDown) {
     paintLinkDownOverlay();
     return;
@@ -460,6 +570,8 @@ function reconnectSession() {
 
 async function loadTrains() {
   if (sessionStopped) return;
+  await refreshLicenceStatus();
+  if (licenceExpired) return;
 
   try {
     const res = await fetchWithTimeout(trainsUrl(), {
@@ -480,6 +592,11 @@ async function loadTrains() {
       }
     }
 
+    if (isLicenceBlockedPayload(data)) {
+      applyLicenceUi(data);
+      return;
+    }
+
     if (!data || isSessionStoppedPayload(data) || res.status === 409 || res.status === 403) {
       if (isSessionStoppedPayload(data) || res.status === 409 || res.status === 403 || (res.ok && !data)) {
         clearSessionId();
@@ -492,6 +609,7 @@ async function loadTrains() {
     if (!data || !Array.isArray(data.trains)) throw new Error('Invalid trains payload');
 
     setLinkDown(false);
+    if (data.licence) applyLicenceUi(data.licence);
     allTrains = data.trains;
     if (pageIndex >= pageCount()) pageIndex = 0;
     updateMeta(data);
@@ -499,7 +617,7 @@ async function loadTrains() {
     scheduleDisplayRotation();
   } catch (err) {
     console.error('Failed to load trains:', err);
-    if (refreshEnabled && !sessionStopped) {
+    if (refreshEnabled && !sessionStopped && !licenceExpired) {
       setLinkDown(true);
     }
   }

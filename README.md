@@ -4,7 +4,7 @@ Local Ubuntu appliance for Indian Railways passenger displays: **Platform**, **C
 
 This repository is the station PC software only. It does not include AWS, Lambda, or cloud deploys.
 
-Default station in the sample licence: **BG / Bhongir**. Sample licence is valid **2026-08-25 to 2027-08-25** for platform and coach. The signing **private key is not in this repo** and must never be copied onto the appliance.
+Default station in the sample licence: **BG / Bhongir**. Sample licence is a **30-day demo** valid **2026-08-27 to 2026-09-26** for platform and coach. From 7 days before expiry the boards show **EXPIRING soon**. After expiry they show a blocking **Licence expired** popup. Station cannot be changed from Admin. The signing **private key is not in this repo** and must never be copied onto the appliance.
 
 ## Zero-touch install (Ubuntu 24.04)
 
@@ -63,7 +63,7 @@ Replace `VM_IP` with the Ubuntu LAN address (`hostname -I` on the guest):
 | Surface | URL |
 | --- | --- |
 | Platform | `http://VM_IP/platform/` |
-| Coach | `http://VM_IP/coach/?station=BG&display=entrance-main` |
+| Coach | `http://VM_IP/coach/chart.html?station=BG&display=entrance-main` (Chart view only) |
 | Admin | `http://VM_IP/admin/` |
 | Health | `http://VM_IP/health` |
 

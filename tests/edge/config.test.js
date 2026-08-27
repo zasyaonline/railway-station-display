@@ -14,6 +14,7 @@ test('validateConfig requires station identity', () => {
   assert.equal(ok.ok, true);
   assert.equal(ok.config.stationCode, 'BG');
   assert.equal(ok.config.licence.gracePeriodHours, null);
+  assert.equal(ok.config.licence.expiringWarningDays, 7);
 });
 
 test('ensureRuntimeLayout creates expected directories', () => {

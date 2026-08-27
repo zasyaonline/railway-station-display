@@ -1173,3 +1173,21 @@ body[data-vh="tiny"] .clock-date { display: none; }
   font-size: clamp(1rem, 1.6vw, 1.3rem) !important;
 }
 
+.licence-expiring-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  padding: 0.55rem 1.2rem;
+  text-align: center;
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #111827;
+  background: #fbbf24;
+  border-bottom: 3px solid #d97706;
+}
+.licence-expiring-banner[hidden] { display: none !important; }
+body.licence-expiring { padding-top: 2.4rem; }
+

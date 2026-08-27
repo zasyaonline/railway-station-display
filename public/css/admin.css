@@ -263,6 +263,10 @@
   cursor: default;
 }
 
+body.station-locked .station-row {
+  display: none !important;
+}
+
 .admin-link {
   color: #f97316;
   text-decoration: none;

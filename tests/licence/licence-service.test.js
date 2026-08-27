@@ -103,6 +103,25 @@ test('expired licence is blocked', () => {
   assert.equal(result.state, LICENCE_STATES.BLOCKED);
 });
 
+test('licence within warning window is EXPIRING', () => {
+  const { licence, publicKeyPem } = signedLicence({
+    validFrom: '2026-08-01',
+    validUntil: '2026-09-01'
+  });
+  const result = evaluateLicence({
+    licenceRaw: licence,
+    publicKeyPem,
+    stationCode: 'BG',
+    now: new Date('2026-08-28T00:00:00Z'),
+    expiringWarningDays: 7,
+    persist: false,
+    persisted: persistedNone()
+  });
+  assert.equal(result.state, LICENCE_STATES.EXPIRING);
+  assert.equal(result.operational, true);
+  assert.equal(result.blocked, false);
+});
+
 test('missing licence is blocked', () => {
   const result = evaluateLicence({
     licenceRaw: null,

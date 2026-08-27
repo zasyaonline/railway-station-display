@@ -16,7 +16,7 @@ function emptyConfig() {
     },
     licence: {
       gracePeriodHours: null,
-      expiringWarningDays: null
+      expiringWarningDays: 7
     },
     ports: {
       platform: 3000,
@@ -80,7 +80,9 @@ function validateConfig(raw) {
       licence: {
         gracePeriodHours: grace == null ? null : Number(grace),
         expiringWarningDays:
-          licence.expiringWarningDays == null ? null : Number(licence.expiringWarningDays)
+          licence.expiringWarningDays == null
+            ? merged.licence.expiringWarningDays
+            : Number(licence.expiringWarningDays)
       },
       ports: {
         ...merged.ports,

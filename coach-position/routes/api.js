@@ -10,7 +10,7 @@ const { isAppliance } = require('../../edge/runtime/mode');
 const { requireAdmin: requireEdgeAdmin, loadAdminSecret } = require('../../edge/admin/auth');
 const { readJson: readRuntimeJson } = require('../../edge/storage/atomic-file');
 const { ntesStatePath } = require('../../shared/paths');
-const { evaluateFromDisk } = require('../../edge/licence/licence-service');
+const { evaluateFromDisk, publicLicenceView } = require('../../edge/licence/licence-service');
 const { loadConfig } = require('../../edge/config/config-service');
 const { createLogger } = require('../../shared/logging');
 const coachLog = createLogger('coach');
@@ -90,19 +90,27 @@ function createApiRouter(deps) {
     return normalizeStation(requested);
   }
 
-  function licenceGate(res) {
-    if (!isAppliance()) return true;
+  function currentLicence() {
+    if (!isAppliance()) return { operational: true, blocked: false, state: 'VALID' };
     const cfg = loadConfig().config || {};
-    const evaluation = evaluateFromDisk({
+    return evaluateFromDisk({
       stationCode: cfg.stationCode,
       gracePeriodHours: cfg.licence?.gracePeriodHours,
+      expiringWarningDays: cfg.licence?.expiringWarningDays,
       persist: false
     });
+  }
+
+  function licenceGate(res) {
+    const evaluation = currentLicence();
     if (evaluation.blocked || evaluation.operational === false) {
+      const view = publicLicenceView(evaluation);
       res.status(503).json({
         error: 'licence_blocked',
         state: evaluation.state,
-        message: evaluation.reason || 'Licence does not allow passenger display'
+        validUntil: view?.validUntil || null,
+        daysLeft: view?.daysLeft ?? 0,
+        message: evaluation.reason || 'Licence expired'
       });
       return false;
     }
@@ -208,6 +216,7 @@ function createApiRouter(deps) {
     if (result.error) return res.status(result.status || 500).json(result);
     result.body.liveFetchedAt = live.fetchedAt;
     result.body.liveTrainCount = live.trains.length;
+    result.body.licence = publicLicenceView(currentLicence());
     writeJson(stationRel(code).board, result.body);
     res.set('Cache-Control', 'no-store');
     res.json(result.body);

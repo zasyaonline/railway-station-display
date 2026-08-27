@@ -33,6 +33,7 @@ const {
 const { isAppliance } = require('../edge/runtime/mode');
 const { requireAdmin: requireEdgeAdmin, loadAdminSecret } = require('../edge/admin/auth');
 const { createLogger } = require('../shared/logging');
+const { publicLicenceView } = require('../edge/licence/licence-service');
 const adminLog = createLogger('platform');
 
 function createApiRouter(deps) {
@@ -120,11 +121,14 @@ function createApiRouter(deps) {
     if (!registerViewer(req, res)) return;
 
     const licence = getLicence();
+    const licenceView = publicLicenceView(licence);
     if (licence.blocked || licence.operational === false) {
       return res.status(503).json({
         error: 'licence_blocked',
         state: licence.state,
-        message: licence.reason || 'Licence does not allow passenger display'
+        validUntil: licenceView?.validUntil || null,
+        daysLeft: licenceView?.daysLeft ?? 0,
+        message: licence.reason || 'Licence expired'
       });
     }
 
@@ -155,6 +159,7 @@ function createApiRouter(deps) {
       languages: cache.config.languages || ['en', 'te', 'hi'],
       source: cache.sourceStatus === 'stale' ? 'NTES Live Station (stale)' : 'NTES Live Station',
       sourceStatus: cache.sourceStatus || 'fresh',
+      licence: licenceView,
       trains
     });
   });
@@ -233,13 +238,13 @@ function createApiRouter(deps) {
       stationName: cache.config.stationName || 'Charlapalli',
       stationPresets: presetsFromMaster(stations),
       stationNames: stationLocales(cache.config.stationCode, cache.config.stationName),
-      stationPinned: Boolean(deps.pinnedStation && deps.pinnedStation())
+      stationPinned: Boolean(isAppliance() || (deps.pinnedStation && deps.pinnedStation()))
     });
   });
 
   router.post('/admin/station', async (req, res) => {
     if (!requireAdmin(req, res)) return;
-    if (deps.pinnedStation && deps.pinnedStation()) {
+    if (isAppliance() || (deps.pinnedStation && deps.pinnedStation())) {
       return res.status(403).json({
         error: 'station_pinned',
         message: 'Station identity is set at installation and cannot be changed at runtime'

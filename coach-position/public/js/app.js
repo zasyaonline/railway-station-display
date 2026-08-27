@@ -15,6 +15,8 @@ const FETCH_TIMEOUT_MS = 8000;
 let sessionStopped = false;
 let linkDown = false;
 let lastReceivedIso = null;
+let licenceExpired = false;
+let lastLicenceView = null;
 
 let languages = ['en', 'te', 'hi'];
 let langIndex = 0;
@@ -439,7 +441,7 @@ function updateClock() {
   $('langLabel').textContent = t('lang');
   document.documentElement.lang = currentLang();
   const minute = now.getHours() * 60 + now.getMinutes();
-  if (lastPayload && !linkDown && minute !== lastPickMinute) {
+  if (lastPayload && !linkDown && !licenceExpired && minute !== lastPickMinute) {
     lastPickMinute = minute;
     render(lastPayload);
   }
@@ -917,7 +919,7 @@ function headingBanner(heading) {
 function ensureFocusRotation() {
   if (focusRotateTimer) return;
   focusRotateTimer = setInterval(() => {
-    if (!lastPayload || linkDown) return;
+    if (!lastPayload || linkDown || licenceExpired) return;
     const live = overlappingFocusPicks(lastPayload);
     if (live.length <= 1) return;
     focusRotateIndex = (focusRotateIndex + 1) % live.length;
@@ -1174,40 +1176,12 @@ function render(payload) {
     adminLink.textContent = t('admin');
     if (publicPrefix()) adminLink.href = '/admin';
   }
-  const q = displayQuery();
-  const prefix = publicPrefix();
-  const linkCurrent = $('linkCurrentTv');
-  const linkPremium = $('linkPremiumTv');
-  const linkChart = $('linkChartView');
-  if (linkCurrent) {
-    linkCurrent.href = `${prefix}/?${q}`;
-    linkCurrent.textContent = t('currentTvView');
-    linkCurrent.hidden = THEME === 'tv';
-  }
-  if (linkPremium) {
-    linkPremium.href = `${prefix}/premium.html?${q}`;
-    linkPremium.textContent = t('premiumView');
-    linkPremium.hidden = THEME === 'premium';
-  }
-  if (linkChart) {
-    linkChart.href = `${prefix}/chart.html?${q}`;
-    linkChart.textContent = t('chartView');
-    linkChart.hidden = THEME === 'chart';
-  }
-  /* Legacy single themeLink (older HTML) */
-  const themeLink = $('themeLink');
-  if (themeLink && !linkCurrent && !linkPremium && !linkChart) {
-    if (THEME === 'premium') {
-      themeLink.href = `/?${q}`;
-      themeLink.textContent = t('currentTvView');
-    } else if (THEME === 'chart') {
-      themeLink.href = `/?${q}`;
-      themeLink.textContent = t('tvView');
-    } else {
-      themeLink.href = `/premium.html?${q}`;
-      themeLink.textContent = t('premiumView');
-    }
-  }
+  const themeNav = document.querySelector('.theme-nav');
+  if (themeNav) themeNav.hidden = true;
+  ['linkCurrentTv', 'linkPremiumTv', 'linkChartView', 'themeLink'].forEach((id) => {
+    const el = $(id);
+    if (el) el.hidden = true;
+  });
 
   const focus = resolveFocusForRender(payload);
   lastPickMinute = new Date().getHours() * 60 + new Date().getMinutes();
@@ -1328,7 +1302,7 @@ function paintLinkDownOverlay() {
 }
 
 function setLinkDown(down) {
-  if (sessionStopped) down = false;
+  if (sessionStopped || licenceExpired) down = false;
   linkDown = Boolean(down);
   const el = ensureLinkDownOverlay();
   el.hidden = !linkDown;
@@ -1336,9 +1310,105 @@ function setLinkDown(down) {
   if (linkDown) paintLinkDownOverlay();
 }
 
+function isLicenceBlockedPayload(data) {
+  if (!data) return false;
+  const state = String(data.state || '').toUpperCase();
+  return data.error === 'licence_blocked' || data.blocked === true
+    || state === 'BLOCKED' || state === 'INVALID' || state === 'MISSING';
+}
+
+function formatLicenceUntil(isoDate) {
+  if (!isoDate) return '';
+  return new Date(`${isoDate}T23:59:59Z`).toLocaleDateString(locale(), {
+    day: 'numeric', month: 'short', year: 'numeric'
+  });
+}
+
+function ensureLicenceExpiredOverlay() {
+  let el = $('licenceExpiredOverlay');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'licenceExpiredOverlay';
+  el.className = 'link-down-overlay licence-expired-overlay';
+  el.hidden = true;
+  el.setAttribute('role', 'alertdialog');
+  document.body.appendChild(el);
+  return el;
+}
+
+function paintLicenceExpiredOverlay(data) {
+  const el = ensureLicenceExpiredOverlay();
+  const until = data?.validUntil ? `${t('validUntil')}: ${formatLicenceUntil(data.validUntil)}` : '';
+  el.innerHTML = `
+    <div class="link-down-card">
+      <p class="link-down-kicker">${esc(t('licenceExpiredKicker'))}</p>
+      <h2>${esc(t('licenceExpiredTitle'))}</h2>
+      <p>${esc(t('licenceExpiredBody'))}</p>
+      ${until ? `<p class="link-down-meta">${esc(until)}</p>` : ''}
+    </div>`;
+}
+
+function setLicenceExpired(data) {
+  licenceExpired = Boolean(data);
+  const el = ensureLicenceExpiredOverlay();
+  el.hidden = !licenceExpired;
+  document.body.classList.toggle('licence-expired', licenceExpired);
+  if (licenceExpired) {
+    setLinkDown(false);
+    paintLicenceExpiredOverlay(data);
+  }
+}
+
+function ensureLicenceExpiringBanner() {
+  let el = $('licenceExpiringBanner');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'licenceExpiringBanner';
+  el.className = 'licence-expiring-banner';
+  el.hidden = true;
+  el.setAttribute('role', 'status');
+  document.body.appendChild(el);
+  return el;
+}
+
+function setLicenceExpiring(data) {
+  const el = ensureLicenceExpiringBanner();
+  const show = Boolean(data) && !licenceExpired && String(data.state || '').toUpperCase() === 'EXPIRING';
+  el.hidden = !show;
+  document.body.classList.toggle('licence-expiring', show);
+  if (!show) return;
+  el.textContent = t('licenceExpiring')
+    .replace('{date}', formatLicenceUntil(data.validUntil))
+    .replace('{n}', String(Math.max(0, data.daysLeft ?? 0)));
+}
+
+function applyLicenceUi(data) {
+  if (!data) return;
+  lastLicenceView = data;
+  if (isLicenceBlockedPayload(data)) {
+    setLicenceExpired(data);
+    setLicenceExpiring(null);
+    return;
+  }
+  setLicenceExpired(null);
+  setLicenceExpiring(data);
+}
+
+async function refreshLicenceStatus() {
+  try {
+    const res = await fetchWithTimeout('/api/licence/status', { headers: { Accept: 'application/json' } });
+    if (!res.ok) return;
+    applyLicenceUi(await res.json());
+  } catch {
+    /* local coach without licence endpoint */
+  }
+}
+
 function acceptBoardPayload(data, displaysDoc) {
   lastReceivedIso = data.generatedAt || data.liveFetchedAt || new Date().toISOString();
   setLinkDown(false);
+  if (data.licence) applyLicenceUi(data.licence);
+  if (licenceExpired) return;
   render(applyDisplay(data, displaysDoc));
 }
 
@@ -1363,6 +1433,8 @@ function reconnectSession() {
 
 async function loadBoard() {
   if (sessionStopped) return;
+  await refreshLicenceStatus();
+  if (licenceExpired) return;
   const display = displayId();
   const station = stationCode();
   const sessionId = getSessionId();
@@ -1376,6 +1448,10 @@ async function loadBoard() {
         { headers: { 'X-Session-Id': sessionId, Accept: 'application/json' } }
       );
       const data = await res.json().catch(() => null);
+      if (isLicenceBlockedPayload(data)) {
+        applyLicenceUi(data);
+        return;
+      }
       if (isSessionStoppedPayload(data) || (res.status === 409 && isSessionStoppedPayload(data))) {
         clearSessionId();
         showSessionStopped();
@@ -1386,7 +1462,7 @@ async function loadBoard() {
         return;
       }
     } catch {
-      setLinkDown(true);
+      if (!licenceExpired) setLinkDown(true);
       return;
     }
   }
@@ -1411,7 +1487,7 @@ async function loadBoard() {
     }
   }
   setLinkDown(true);
-  if (!lastPayload) {
+  if (!lastPayload && !licenceExpired) {
     $('board').innerHTML = `<div class="idle">${esc(t('linkDownTitle'))}</div>`;
   }
 }
@@ -1422,11 +1498,17 @@ setInterval(updateClock, 1000);
 setInterval(() => {
   if (sessionStopped) return;
   langIndex = (langIndex + 1) % languages.length;
+  if (licenceExpired) {
+    paintLicenceExpiredOverlay(lastLicenceView);
+    updateClock();
+    return;
+  }
   if (linkDown) {
     paintLinkDownOverlay();
     updateClock();
     return;
   }
+  if (lastLicenceView) applyLicenceUi(lastLicenceView);
   if (lastPayload) render(lastPayload);
   else updateClock();
 }, LANG_MS);
